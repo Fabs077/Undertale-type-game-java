@@ -1,0 +1,21 @@
+# Compilados de Maven
+target/
+
+# Archivo temporal del run.bat
+sources.txt
+
+# Archivos de configuración de IDEs
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
