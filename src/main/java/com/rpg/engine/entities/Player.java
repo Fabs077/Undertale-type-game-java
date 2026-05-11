@@ -8,8 +8,6 @@ import com.rpg.engine.items.Item;
 import com.rpg.engine.items.Weapon;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * El jugador. Único personaje controlado por el humano.
@@ -39,7 +37,7 @@ public class Player extends Character implements Persistable {
     private int baseDefense;
     private Weapon equippedWeapon; // null si no lleva arma
     private Armor  equippedArmor;  // null si no lleva armadura
-    private final List<Item> inventory;
+    private final ArrayList<Item> inventory;
 
     public Player(String name, int maxHp, int baseAttack, int baseDefense) {
         super(name, maxHp);
@@ -140,10 +138,10 @@ public class Player extends Character implements Persistable {
     }
 
     /**
-     * @return vista inmutable del inventario (nadie puede modificarlo desde afuera)
+     * @return copia del inventario como ArrayList (modificar la copia no afecta al original)
      */
-    public List<Item> getInventory() {
-        return Collections.unmodifiableList(inventory);
+    public ArrayList<Item> getInventory() {
+        return new ArrayList<>(inventory);
     }
 
     // -------------------------------------------------------------------------
@@ -168,6 +166,10 @@ public class Player extends Character implements Persistable {
      */
     @Override
     public String saveData() {
+        ArrayList<String> ids = new ArrayList<>();
+        for (Item item : inventory) {
+            ids.add(item.getId());
+        }
         PlayerSaveDto dto = new PlayerSaveDto(
             name,
             hp,
@@ -176,7 +178,7 @@ public class Player extends Character implements Persistable {
             baseDefense,
             equippedWeapon != null ? equippedWeapon.getId() : null,
             equippedArmor  != null ? equippedArmor.getId()  : null,
-            inventory.stream().map(Item::getId).toList()
+            ids
         );
         return JsonUtil.toJson(dto);
     }
@@ -241,6 +243,6 @@ public class Player extends Character implements Persistable {
         int baseDefense,
         String equippedWeaponId,
         String equippedArmorId,
-        List<String> inventoryIds
+        ArrayList<String> inventoryIds
     ) { }
 }

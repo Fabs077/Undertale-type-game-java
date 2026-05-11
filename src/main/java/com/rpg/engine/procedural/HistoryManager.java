@@ -6,8 +6,6 @@ import com.rpg.engine.core.util.JsonUtil;
 import com.rpg.engine.entities.Boss;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Registra cronológicamente las decisiones tomadas al final de cada combate.
@@ -23,7 +21,7 @@ import java.util.List;
  */
 public class HistoryManager implements Persistable {
 
-    private final List<DecisionRecord> records = new ArrayList<>();
+    private final ArrayList<DecisionRecord> records = new ArrayList<>();
 
     // -------------------------------------------------------------------------
     // Registro de decisiones
@@ -45,9 +43,9 @@ public class HistoryManager implements Persistable {
         ));
     }
 
-    /** @return vista inmutable de todos los registros en orden cronológico */
-    public List<DecisionRecord> getRecords() {
-        return Collections.unmodifiableList(records);
+    /** @return copia del historial en orden cronológico */
+    public ArrayList<DecisionRecord> getRecords() {
+        return new ArrayList<>(records);
     }
 
     /** @return número de jefes perdonados hasta ahora */
@@ -70,9 +68,10 @@ public class HistoryManager implements Persistable {
      */
     @Override
     public String saveData() {
-        List<EntryDto> dtos = records.stream()
-            .map(r -> new EntryDto(r.bossName(), r.phaseLevel(), r.wasSpared(), r.timestamp()))
-            .toList();
+        ArrayList<EntryDto> dtos = new ArrayList<>();
+        for (DecisionRecord r : records) {
+            dtos.add(new EntryDto(r.bossName(), r.phaseLevel(), r.wasSpared(), r.timestamp()));
+        }
         return JsonUtil.toJson(new HistorySaveDto(dtos));
     }
 
@@ -104,7 +103,7 @@ public class HistoryManager implements Persistable {
     // DTOs privados de serialización
     // -------------------------------------------------------------------------
 
-    private record HistorySaveDto(List<EntryDto> entries) { }
+    private record HistorySaveDto(ArrayList<EntryDto> entries) { }
 
     private record EntryDto(String bossName, int phaseLevel, boolean wasSpared, long timestamp) { }
 }

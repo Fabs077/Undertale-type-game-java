@@ -4,7 +4,6 @@ import com.rpg.engine.items.Consumable;
 import com.rpg.engine.items.Item;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -34,7 +33,7 @@ public class Boss extends Enemy {
 
     private static final int ACTS_TO_SPARE = 3; // threshold mínimo de ACTs para poder perdonar
 
-    private List<String> dialogues;
+    private ArrayList<String> dialogues;
     private boolean isSpared;
     private int phaseLevel;
     private int actsPerformed; // incrementado por registerActAttempt()
@@ -200,5 +199,5 @@ public class Boss extends Enemy {
     public boolean isSpared()                  { return isSpared; }
     public int getPhaseLevel()                 { return phaseLevel; }
     public int getActsPerformed()              { return actsPerformed; }
-    public List<String> getDialogues()         { return Collections.unmodifiableList(dialogues); }
+    public ArrayList<String> getDialogues()     { return new ArrayList<>(dialogues); }
 }

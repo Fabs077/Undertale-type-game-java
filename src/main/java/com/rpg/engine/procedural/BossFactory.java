@@ -5,7 +5,6 @@ import com.rpg.engine.entities.Boss;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -29,7 +28,7 @@ import java.util.Random;
  */
 public class BossFactory {
 
-    private final Map<Integer, List<Boss>> bossPools = new HashMap<>();
+    private final Map<Integer, ArrayList<Boss>> bossPools = new HashMap<>();
     private final Random rng;
 
     public BossFactory(Random rng) {
@@ -67,7 +66,7 @@ public class BossFactory {
      * @throws ResourceNotFoundException si no hay prototipos registrados para esa fase
      */
     public Boss generateRandomBoss(int phaseLevel) throws ResourceNotFoundException {
-        List<Boss> pool = bossPools.get(phaseLevel);
+        ArrayList<Boss> pool = bossPools.get(phaseLevel);
         if (pool == null || pool.isEmpty()) {
             throw new ResourceNotFoundException("boss pool for phase " + phaseLevel);
         }
@@ -86,7 +85,7 @@ public class BossFactory {
      * @return número de prototipos registrados para esa fase (0 si la fase no existe)
      */
     public int poolSize(int phaseLevel) {
-        List<Boss> pool = bossPools.get(phaseLevel);
+        ArrayList<Boss> pool = bossPools.get(phaseLevel);
         return pool == null ? 0 : pool.size();
     }
 }

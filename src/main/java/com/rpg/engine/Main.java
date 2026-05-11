@@ -16,6 +16,7 @@ import com.rpg.engine.items.Consumable;
 import com.rpg.engine.items.Weapon;
 import com.rpg.engine.procedural.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -179,8 +180,9 @@ public class Main {
         p2.addLoot(null);
         check("addLoot ignora null",                       p2.getInventory().size() == 1);
 
-        checkThrows("getInventory() es inmutable",
-            () -> p2.getInventory().clear());
+        ArrayList<com.rpg.engine.items.Item> copy = p2.getInventory();
+        copy.clear();
+        check("getInventory() devuelve copia segura",      p2.getInventory().size() == 1);
 
         p = p2;
 
@@ -491,8 +493,9 @@ public class Main {
         check("getSparedCount = 2",                     hist.getSparedCount() == 2);
         check("getKilledCount = 1",                     hist.getKilledCount() == 1);
 
-        checkThrows("getRecords() es inmutable",
-            () -> hist.getRecords().clear());
+        ArrayList<DecisionRecord> recCopy = hist.getRecords();
+        recCopy.clear();
+        check("getRecords() devuelve copia segura",        hist.getRecords().size() == 3);
 
         subsection("StoryGenerator — getCurrentRoute");
         HistoryManager hPacific  = new HistoryManager();
