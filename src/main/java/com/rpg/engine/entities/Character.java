@@ -61,9 +61,28 @@ public abstract class Character {
 
     // --- Getters (no hay setters públicos para hp) ---
 
-    public String getName()  { return name; }
-    public int getHp()       { return hp; }
-    public int getMaxHp()    { return maxHp; }
+    /**
+     * Cambia el nombre del personaje en tiempo de ejecución.
+     * Útil para interacciones narrativas: un boss que revela su nombre verdadero,
+     * una transformación, un alias que cambia según la ruta.
+     *
+     * @param name el nuevo nombre (no puede ser vacío)
+     */
+    public void setName(String name) {
+        if (name == null || name.isBlank())
+            throw new IllegalArgumentException("name cannot be blank");
+        this.name = name;
+    }
+
+    public String getName()  {
+        return name;
+    }
+    public int getHp()       { 
+        return hp; 
+    }
+    public int getMaxHp()    { 
+        return maxHp; 
+    }
 
     @Override
     public String toString() {
