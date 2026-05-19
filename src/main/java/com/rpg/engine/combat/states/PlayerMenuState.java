@@ -21,13 +21,12 @@ public class PlayerMenuState implements CombatState {
 
     @Override
     public void onEnter(CombatManager ctx) {
-        // FXGL: mostrar el menú de acciones
-        // Backend: no-op — el driver o el test elige la siguiente acción
+
     }
 
     @Override
     public void update(CombatManager ctx) {
-        // no-op — el menú espera input, no avanza por su cuenta
+
     }
 
     @Override
@@ -37,7 +36,6 @@ public class PlayerMenuState implements CombatState {
         ActionResult result = action.execute(ctx);
 
         if (result.isCombatEnded()) {
-            // Nada más que hacer aquí — el bucle externo llama handleVictoryLootDrop()
             return;
         }
 

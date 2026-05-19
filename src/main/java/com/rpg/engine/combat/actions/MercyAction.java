@@ -5,17 +5,6 @@ import com.rpg.engine.combat.CombatManager;
 import com.rpg.engine.core.interfaces.CombatAction;
 import com.rpg.engine.entities.Boss;
 
-/**
- * Acción MERCY: el jugador intenta perdonar al boss.
- *
- * Solo tiene éxito si boss.canBeSpared() == true (el jugador realizó suficientes ACTs).
- * Si el boss no acepta la misericordia, el turno pasa igualmente al boss
- * (el jugador "perdió" su turno intentando perdonar sin éxito).
- *
- * En caso de éxito, marca boss.setSpared(true) y devuelve combatEnded=true.
- * CombatManager.handleVictoryLootDrop() registrará wasSpared=true en HistoryManager,
- * lo que influirá en la ruta narrativa hacia PACIFIC.
- */
 public class MercyAction implements CombatAction {
 
     @Override

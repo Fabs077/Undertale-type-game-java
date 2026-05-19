@@ -13,7 +13,8 @@
         <maven.compiler.source>25</maven.compiler.source>
         <maven.compiler.target>25</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <exec.mainClass>com.rpg.engine.Main</exec.mainClass>
+        <exec.mainClass>com.rpg.ui.DesktopLauncher</exec.mainClass>
+        <gdx.version>1.12.1</gdx.version>
     </properties>
 
     <dependencies>
@@ -22,6 +23,41 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.10.1</version>
+        </dependency>
+
+        <!-- libGDX núcleo -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+
+        <!-- libGDX backend desktop (LWJGL3) -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-backend-lwjgl3</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+
+        <!-- Natives para desktop -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-platform</artifactId>
+            <version>${gdx.version}</version>
+            <classifier>natives-desktop</classifier>
+        </dependency>
+
+        <!-- FreeType: carga de fuentes OTF/TTF (DTM-Mono, DTM-Sans) -->
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-freetype</artifactId>
+            <version>${gdx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.badlogicgames.gdx</groupId>
+            <artifactId>gdx-freetype-platform</artifactId>
+            <version>${gdx.version}</version>
+            <classifier>natives-desktop</classifier>
         </dependency>
     </dependencies>
 
@@ -39,13 +75,15 @@
                 </configuration>
             </plugin>
 
-            <!-- mvn exec:java  →  ejecuta com.rpg.engine.Main -->
+            <!-- mvn exec:java  →  lanza la UI (DesktopLauncher existirá en Sprint 1).
+                 Para correr los tests de consola del motor:
+                 mvn exec:java -Dexec.mainClass=com.rpg.engine.ConsoleTests        -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.3.0</version>
                 <configuration>
-                    <mainClass>com.rpg.engine.Main</mainClass>
+                    <mainClass>com.rpg.ui.DesktopLauncher</mainClass>
                 </configuration>
             </plugin>
         </plugins>

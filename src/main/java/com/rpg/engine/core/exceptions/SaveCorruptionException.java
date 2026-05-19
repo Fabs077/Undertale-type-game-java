@@ -10,11 +10,20 @@ package com.rpg.engine.core.exceptions;
  */
 public class SaveCorruptionException extends Exception {
 
-    public SaveCorruptionException(String message) {
+    /** Usado por capas de engine que no conocen el slot de archivo (e.g. PhaseManager, Player). */
+    public static final int UNKNOWN_SLOT = -1;
+
+    private final int slot;
+
+    public SaveCorruptionException(int slot, String message) {
         super(message);
+        this.slot = slot;
     }
 
-    public SaveCorruptionException(String message, Throwable cause) {
+    public SaveCorruptionException(int slot, String message, Throwable cause) {
         super(message, cause);
+        this.slot = slot;
     }
+
+    public int getSlot() { return slot; }
 }

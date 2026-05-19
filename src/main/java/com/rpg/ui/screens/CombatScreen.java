@@ -1,0 +1,296 @@
+package com.rpg.ui.screens;
+
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.rpg.engine.combat.ActionResult;
+import com.rpg.ui.RpgGame;
+import com.rpg.ui.bridge.CombatController;
+import com.rpg.ui.combat.Bullet;
+import com.rpg.ui.combat.BulletPattern;
+import com.rpg.ui.combat.CombatBox;
+import com.rpg.ui.combat.Soul;
+import com.rpg.ui.combat.patterns.RadialSpreadPattern;
+import com.rpg.ui.input.PlayerInputAdapter;
+import com.rpg.ui.widgets.ActionMenu;
+import com.rpg.ui.widgets.ActListWidget;
+import com.rpg.ui.widgets.DialogueBox;
+import com.rpg.ui.widgets.HpBar;
+import com.rpg.ui.widgets.ItemListWidget;
+import com.rpg.ui.widgets.SaveExitDialog;
+
+import java.util.HashSet;
+
+public class CombatScreen extends BaseScreen {
+
+    // ── states ─────────────────────────────────────────────────────────────
+    private enum State { MENU, DIALOGUE, BULLET_HELL, SUBMENU_ITEM, SUBMENU_ACT, PAUSED }
+
+    // ── layout constants ───────────────────────────────────────────────────
+    private static final float SCREEN_W     = 1280f;
+    private static final float SCREEN_H     = 720f;
+    private static final float ENEMY_ZONE_Y = SCREEN_H * 0.60f;   // 432
+    private static final float ACTION_Y     = 8f;
+    private static final float ACTION_H     = 72f;
+    private static final float HPBAR_Y      = ACTION_Y + ACTION_H + 12f;  // 92
+    private static final float BOX_CENTER_X = SCREEN_W / 2f;
+    private static final float BOX_CENTER_Y = (ENEMY_ZONE_Y + HPBAR_Y + 28f) / 2f;
+    private static final int   GRID_COLS    = 6;
+    private static final int   GRID_ROWS    = 2;
+
+    // ── infrastructure ─────────────────────────────────────────────────────
+    private final PlayerInputAdapter input      = new PlayerInputAdapter();
+    private final CombatController   controller = new CombatController();
+
+    // ── widgets ────────────────────────────────────────────────────────────
+    private final CombatBox          combatBox;
+    private final HpBar              hpBar;
+    private final ActionMenu         actionMenu;
+    private final DialogueBox        dialogueBox    = new DialogueBox();
+    private final ItemListWidget     itemList       = new ItemListWidget();
+    private final ActListWidget      actList        = new ActListWidget();
+    private final SaveExitDialog     saveExitDialog = new SaveExitDialog();
+
+    private State         state = State.MENU;
+    private Soul          soul;
+    private BulletPattern activePattern;
+
+    // Acción a ejecutar cuando el diálogo activo termina (Z presionado al final)
+    private Runnable postDialogueAction = () -> state = State.MENU;
+
+    // Balas que ya golpearon al alma en este bullet hell (evita multi-hit)
+    private final HashSet<Bullet> hitBullets = new HashSet<>();
+
+    public CombatScreen(RpgGame game) {
+        super(game);
+        combatBox  = new CombatBox(BOX_CENTER_X, BOX_CENTER_Y);
+        hpBar      = new HpBar(1, controller.getPlayerHp(), controller.getPlayerMaxHp());
+        actionMenu = new ActionMenu(ACTION_Y);
+        actList.setBossName(controller.getBossName());
+    }
+
+    // ── render loop ────────────────────────────────────────────────────────
+
+    @Override
+    protected void draw(float delta) {
+        handleInput();
+        if (state == State.DIALOGUE)    dialogueBox.update(delta);
+        if (state == State.BULLET_HELL) updateBulletHell(delta);
+
+        // Enemy zone placeholder (always visible — PAUSED dialog covers it)
+        drawEnemyGrid();
+
+        // Combat box visible except when submenus/dialog cover it completely
+        boolean showCombatBox = state == State.MENU
+                             || state == State.DIALOGUE
+                             || state == State.BULLET_HELL;
+        if (showCombatBox) combatBox.render(game.shapes);
+
+        // State-specific content
+        switch (state) {
+            case MENU -> actionMenu.render(game.shapes, game.batch);
+
+            case DIALOGUE -> {
+                dialogueBox.render(
+                    game.batch, game.shapes,
+                    combatBox.getInnerX(), combatBox.getInnerY(),
+                    combatBox.getInnerWidth(), combatBox.getInnerHeight());
+                actionMenu.render(game.shapes, game.batch);
+            }
+
+            case BULLET_HELL -> renderBulletHell();
+
+            case SUBMENU_ITEM ->
+                itemList.render(game.batch, game.shapes,
+                    combatBox.getX(), combatBox.getY(),
+                    combatBox.getWidth(), combatBox.getHeight());
+
+            case SUBMENU_ACT ->
+                actList.render(game.batch, game.shapes,
+                    combatBox.getX(), combatBox.getY(),
+                    combatBox.getWidth(), combatBox.getHeight());
+
+            default -> { /* PAUSED — handled after HP bar */ }
+        }
+
+        // HP bar — drawn before the pause overlay so dialog covers it
+        float hpX = (SCREEN_W - hpBar.getTotalWidth()) / 2f;
+        hpBar.render(game.shapes, game.batch, hpX, HPBAR_Y);
+
+        // SaveExitDialog renders last so it covers everything with a black overlay
+        if (state == State.PAUSED) saveExitDialog.render(game.batch, game.shapes);
+    }
+
+    // ── input routing ──────────────────────────────────────────────────────
+
+    private void handleInput() {
+        switch (state) {
+            case MENU         -> handleMenuInput();
+            case DIALOGUE     -> handleDialogueInput();
+            case BULLET_HELL  -> handleBulletHellInput();
+            case SUBMENU_ITEM -> handleItemSubmenuInput();
+            case SUBMENU_ACT  -> handleActSubmenuInput();
+            case PAUSED       -> handlePausedInput();
+        }
+    }
+
+    private void handleMenuInput() {
+        if (input.escape()) { openPause(); return; }
+        if (input.left())   actionMenu.navigate(-1);
+        if (input.right())  actionMenu.navigate(+1);
+        if (input.confirm()) executeSelectedAction();
+    }
+
+    private void handleDialogueInput() {
+        if (input.escape()) { openPause(); return; }
+        if (input.confirm()) {
+            if (!dialogueBox.isDone()) dialogueBox.skip();
+            else postDialogueAction.run();
+        }
+    }
+
+    private void handleBulletHellInput() {
+        // Soul movement is handled inside Soul.update() via Gdx.input.isKeyPressed.
+        // No cancel: el jugador debe sobrevivir el turno del enemigo.
+    }
+
+    private void handleItemSubmenuInput() {
+        if (input.escape()) { openPause(); return; }
+        if (input.up())    itemList.navigate(0, +1);
+        if (input.down())  itemList.navigate(0, -1);
+        if (input.left())  itemList.navigate(-1, 0);
+        if (input.right()) itemList.navigate(+1, 0);
+        if (input.cancel())  { state = State.MENU; return; }
+        if (input.confirm()) {
+            ActionResult result = controller.executeItem(itemList.getSelectedIndex());
+            showDialogue(result.getMessage(), this::enterBulletHell);
+        }
+    }
+
+    private void handleActSubmenuInput() {
+        if (input.escape()) { openPause(); return; }
+        if (input.up())    actList.navigate(0, +1);
+        if (input.down())  actList.navigate(0, -1);
+        if (input.left())  actList.navigate(-1, 0);
+        if (input.right()) actList.navigate(+1, 0);
+        if (input.cancel())  { state = State.MENU; return; }
+        if (input.confirm()) {
+            ActionResult result = controller.executeAct(actList.getSelectedAct().toLowerCase());
+            showDialogue(result.getMessage(), this::enterBulletHell);
+        }
+    }
+
+    private void handlePausedInput() {
+        if (input.left())  saveExitDialog.navigate(-1);
+        if (input.right()) saveExitDialog.navigate(+1);
+        if (input.cancel() || input.escape()) { state = State.MENU; return; }
+        if (input.confirm()) {
+            if (saveExitDialog.isSaveExitSelected()) {
+                game.setScreen(new MainMenuScreen(game));
+            } else {
+                state = State.MENU;
+            }
+        }
+    }
+
+    // ── state transitions ──────────────────────────────────────────────────
+
+    private void executeSelectedAction() {
+        switch (actionMenu.getSelectedIndex()) {
+            case 0 -> {
+                ActionResult result = controller.executeFight();
+                if (result.isCombatEnded()) showDialogue(result.getMessage(), game::goToVictory);
+                else showDialogue(result.getMessage(), this::enterBulletHell);
+            }
+            case 1 -> {
+                combatBox.setMode(CombatBox.Mode.NARROW);
+                actList.reset();
+                state = State.SUBMENU_ACT;
+            }
+            case 2 -> {
+                combatBox.setMode(CombatBox.Mode.NARROW);
+                itemList.reset();
+                state = State.SUBMENU_ITEM;
+            }
+            case 3 -> {
+                ActionResult result = controller.executeMercy();
+                if (result.isCombatEnded()) showDialogue(result.getMessage(), game::goToVictory);
+                else showDialogue(result.getMessage(), this::enterBulletHell);
+            }
+        }
+    }
+
+    private void showDialogue(String message, Runnable onDone) {
+        combatBox.setMode(CombatBox.Mode.NARROW);
+        dialogueBox.setText(message);
+        postDialogueAction = onDone;
+        state = State.DIALOGUE;
+    }
+
+    private void openPause() {
+        saveExitDialog.resetSelection();
+        state = State.PAUSED;
+    }
+
+    private void enterBulletHell() {
+        combatBox.setMode(CombatBox.Mode.WIDE);
+        hitBullets.clear();
+        soul = new Soul(
+            combatBox.getInnerX() + combatBox.getInnerWidth()  / 2f,
+            combatBox.getInnerY() + combatBox.getInnerHeight() / 2f
+        );
+        activePattern = new RadialSpreadPattern();
+        activePattern.start(combatBox);
+        state = State.BULLET_HELL;
+    }
+
+    private void exitBulletHell() {
+        combatBox.setMode(CombatBox.Mode.NARROW);
+        state = State.MENU;
+    }
+
+    // ── helpers ────────────────────────────────────────────────────────────
+
+    private void updateBulletHell(float delta) {
+        activePattern.update(delta);
+        soul.update(delta, combatBox);
+        for (Bullet b : activePattern.getActiveBullets()) {
+            if (!hitBullets.contains(b) && soul.hitbox.overlaps(b.hitbox)) {
+                hitBullets.add(b);
+                controller.applyBulletHit();
+                hpBar.setHp(controller.getPlayerHp());
+                if (!controller.isPlayerAlive()) {
+                    exitBulletHell();
+                    game.goToGameOver();
+                    return;
+                }
+            }
+        }
+        if (activePattern.isFinished()) exitBulletHell();
+    }
+
+    private void renderBulletHell() {
+        game.shapes.begin(ShapeRenderer.ShapeType.Filled);
+        soul.render(game.shapes);
+        for (Bullet b : activePattern.getActiveBullets()) b.render(game.shapes);
+        game.shapes.end();
+    }
+
+    private void drawEnemyGrid() {
+        float zoneX = 40f;
+        float zoneW = SCREEN_W - 80f;
+        float zoneY = ENEMY_ZONE_Y;
+        float zoneH = SCREEN_H - ENEMY_ZONE_Y - 4f;
+        float cellW = zoneW / GRID_COLS;
+        float cellH = zoneH / GRID_ROWS;
+
+        game.shapes.begin(ShapeRenderer.ShapeType.Filled);
+        game.shapes.setColor(Color.GREEN);
+        for (int col = 0; col <= GRID_COLS; col++) {
+            game.shapes.rect(zoneX + col * cellW, zoneY, 2f, zoneH);
+        }
+        for (int row = 0; row <= GRID_ROWS; row++) {
+            game.shapes.rect(zoneX, zoneY + row * cellH, zoneW, 2f);
+        }
+        game.shapes.end();
+    }
+}

@@ -5,17 +5,6 @@ import com.rpg.engine.combat.CombatManager;
 import com.rpg.engine.core.interfaces.CombatAction;
 import com.rpg.engine.items.Item;
 
-/**
- * Acción ITEM: el jugador usa un objeto del inventario en combate.
- *
- * El ítem a usar se inyecta en el constructor (Command lleva sus propios datos).
- * Player.useItem() se encarga de:
- *   - verificar que el ítem está en el inventario (no-op si no está)
- *   - llamar item.use(player) → polimorfismo decide el efecto
- *   - retirar el ítem si isSingleUse() (Consumable)
- *
- * ItemAction no necesita saber si el ítem es un arma, armadura o poción.
- */
 public class ItemAction implements CombatAction {
 
     private final Item item;

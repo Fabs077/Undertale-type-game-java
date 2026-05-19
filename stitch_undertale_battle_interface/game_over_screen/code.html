@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#393939",
+                        "on-tertiary": "#323200",
+                        "on-error": "#690005",
+                        "primary-fixed-dim": "#ffb869",
+                        "tertiary": "#d6d600",
+                        "outline": "#a28d79",
+                        "surface-container": "#1f1f1f",
+                        "surface-container-low": "#1b1b1b",
+                        "primary-fixed": "#ffdcbb",
+                        "outline-variant": "#544433",
+                        "on-secondary-container": "#b4b5b5",
+                        "inverse-surface": "#e2e2e2",
+                        "surface-tint": "#ffb869",
+                        "on-primary-fixed": "#2c1700",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-fixed-variant": "#673d00",
+                        "surface-container-highest": "#353535",
+                        "background": "#000000",
+                        "primary-container": "#ff9d00",
+                        "on-secondary": "#2f3131",
+                        "surface-variant": "#353535",
+                        "on-primary-container": "#663c00",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface-dim": "#131313",
+                        "on-background": "#e2e2e2",
+                        "primary": "#ffc485",
+                        "tertiary-fixed": "#eaea00",
+                        "inverse-primary": "#885200",
+                        "inverse-on-surface": "#303030",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "surface": "#000000",
+                        "secondary-container": "#454747",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "secondary": "#c6c6c7",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-surface": "#e2e2e2",
+                        "on-primary": "#482900",
+                        "on-secondary-fixed-variant": "#454747",
+                        "on-tertiary-container": "#484800",
+                        "on-surface-variant": "#dac2ad",
+                        "on-tertiary-fixed": "#1d1d00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "unit-2": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "base": "4px",
+                        "unit-8": "32px",
+                        "unit-1": "4px",
+                        "margin-desktop": "32px",
+                        "unit-4": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["JetBrains Mono"],
+                        "label-lg": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Space Mono"],
+                        "headline-lg": ["Space Mono"],
+                        "body-md": ["Space Mono"],
+                        "headline-md": ["Space Mono"],
+                        "body-lg": ["Space Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .pixel-border-4 {
+            box-shadow: 0 0 0 4px currentColor;
+        }
+        .text-glow-red {
+            text-shadow: 0 0 10px rgba(255, 180, 171, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-hidden">
+<div class="flex flex-col items-center justify-center min-h-screen w-full px-margin-mobile">
+<!-- Massive Centered Title -->
+<h1 class="font-headline-lg text-[72px] leading-none text-error tracking-tighter uppercase mb-unit-4 text-glow-red text-center">
+            GAME OVER
+        </h1>
+<!-- 2px White Divider -->
+<div class="w-[400px] h-[2px] bg-on-surface mb-unit-8"></div>
+<!-- Narrative Text -->
+<div class="text-center mb-12">
+<p class="font-body-lg text-on-surface italic leading-relaxed">
+                You cannot give up just yet...<br/>
+                Your soul still burns with determination.
+            </p>
+</div>
+<!-- Stacked Buttons Container -->
+<div class="flex flex-col gap-6 items-center w-full max-w-[300px]">
+<!-- RETRY PHASE Button -->
+<button class="w-[300px] h-[60px] bg-transparent border-[4px] border-primary-container text-primary-container flex items-center justify-center gap-unit-2 hover:bg-primary-container hover:text-surface transition-colors">
+<span class="material-symbols-outlined text-[24px]" data-icon="play_arrow" data-weight="fill" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+<span class="font-label-lg text-[20px] uppercase tracking-wider">RETRY PHASE</span>
+</button>
+<!-- RETURN TO MENU Button -->
+<button class="w-[300px] h-[60px] bg-transparent border-[4px] border-on-surface text-on-surface flex items-center justify-center gap-unit-2 hover:bg-on-surface hover:text-surface transition-colors">
+<span class="material-symbols-outlined text-[24px]" data-icon="arrow_back">arrow_back</span>
+<span class="font-label-lg text-[20px] uppercase tracking-wider">RETURN TO MENU</span>
+</button>
+</div>
+<!-- Spacer for Layout Balance -->
+<div class="h-24"></div>
+<!-- Footer Instructions -->
+<footer class="fixed bottom-unit-8 left-0 right-0 text-center">
+<p class="font-label-sm text-secondary text-[14px] uppercase tracking-[0.2em]">
+                [↑↓] NAVIGATE     [Z] CONFIRM
+            </p>
+</footer>
+</div>
+<!-- Hidden shared components logic as per instructions (excluding nav because this is a focused view) -->
+<!-- The Shared HeadlineText component is provided in the prompt but explicitly excluded for "Booking/Process" style screens. 
+         This Game Over screen follows the specific task requirements while respecting the Style Guidance tokens. -->
+</body></html>

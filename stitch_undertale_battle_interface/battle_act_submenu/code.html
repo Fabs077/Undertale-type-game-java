@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TERMINAL_RPG_V1.0 - BATTLE_INTERFACE</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#1f1f1f",
+                        "surface-container-high": "#2a2a2a",
+                        "on-error-container": "#ffdad6",
+                        "primary-container": "#ff9d00",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "tertiary-container": "#baba00",
+                        "surface-tint": "#ffb869",
+                        "surface-dim": "#131313",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "inverse-on-surface": "#303030",
+                        "secondary-fixed": "#e2e2e2",
+                        "on-secondary-fixed-variant": "#454747",
+                        "error": "#ffb4ab",
+                        "on-surface-variant": "#dac2ad",
+                        "on-background": "#e2e2e2",
+                        "inverse-primary": "#885200",
+                        "inverse-surface": "#e2e2e2",
+                        "surface-container-highest": "#353535",
+                        "surface-container-low": "#1b1b1b",
+                        "outline-variant": "#544433",
+                        "secondary": "#c6c6c7",
+                        "primary-fixed": "#ffdcbb",
+                        "on-tertiary": "#323200",
+                        "on-primary-fixed-variant": "#673d00",
+                        "error-container": "#93000a",
+                        "tertiary": "#d6d600",
+                        "tertiary-fixed": "#eaea00",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "primary-fixed-dim": "#ffb869",
+                        "on-secondary-container": "#b4b5b5",
+                        "outline": "#a28d79",
+                        "on-surface": "#e2e2e2",
+                        "background": "#000000",
+                        "on-primary-fixed": "#2c1700",
+                        "on-primary-container": "#663c00",
+                        "surface-bright": "#393939",
+                        "surface": "#131313",
+                        "surface-variant": "#353535",
+                        "secondary-container": "#454747",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-primary": "#482900",
+                        "primary": "#ffc485",
+                        "on-tertiary-container": "#484800",
+                        "on-error": "#690005",
+                        "on-secondary": "#2f3131",
+                        "retro-orange": "#FF9D00",
+                        "retro-yellow": "#FFFF00"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "unit-8": "32px",
+                        "unit-2": "8px",
+                        "unit-1": "4px",
+                        "margin-desktop": "32px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "unit-4": "16px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["JetBrains Mono"],
+                        "label-lg": ["JetBrains Mono"],
+                        "headline-lg": ["Space Mono"],
+                        "body-md": ["Space Mono"],
+                        "headline-md": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "headline-lg-mobile": ["Space Mono"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "label-lg": ["14px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-1px", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "0px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #000000;
+            color: #e2e2e2;
+            image-rendering: pixelated;
+        }
+        .pixel-border-4 { border-width: 4px; }
+        .pixel-border-2 { border-width: 2px; }
+        .pixel-grid {
+            background-size: 32px 32px;
+            background-image: linear-gradient(to right, #004400 1px, transparent 1px), linear-gradient(to bottom, #004400 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="bg-black overflow-hidden font-body-md text-body-md flex flex-col items-center justify-center min-h-screen">
+<!-- Top Navigation (Shell Implementation) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-unit-4 py-unit-2 border-b-4 border-primary bg-background">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">TERMINAL_RPG_V1.0</div>
+<div class="flex gap-unit-4">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<span class="material-symbols-outlined text-on-surface">settings</span>
+</div>
+</header>
+<!-- Main Game Canvas (720p aspect ratio container) -->
+<main class="w-[1280px] h-[720px] flex flex-col items-center justify-between py-unit-8 pt-24 pb-20 relative">
+<!-- 1. Boss Sprite Area -->
+<div class="w-[600px] h-[250px] pixel-border-4 border-[#00FF00] relative flex items-center justify-center bg-black overflow-hidden">
+<img alt="PAPYRUS" class="h-[220px] object-contain" data-alt="A stylized 8-bit character sprite of a tall, lanky skeleton wearing a heroic cape and armor, standing in a confident pose. The character is rendered in crisp white pixels against a stark black background, mimicking a classic monochromatic CRT display. The lighting is flat and iconic, with sharp geometric edges defining the armor. The mood is determined and eccentric, fitting a retro tactical RPG boss encounter." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBzwjQSXxQh4Oyv2Ih9tWcRYmHBM1NW3401pC2InCC5d6wu_smDuK8lrTkrrG5NdpOK1wMpWRhiuo5kbBdcjfsIFZdvy2ungQqwqnCZg2sow9qMGZDxobj9A91xUXXnYmfH0R30MUFat1KmoHlA2J3BDa1fZKdLy-znGf4CaQ6ytjYj2w5N5xMRdqX9JtOX-vaVPMATref6F3PQzWIZt35SgowEzz_41VbBCB8o_coa8H19oWEiacxrpBOq7rtvF0vmzmDYUNe6EuTD"/>
+</div>
+<!-- 2. HP Bar & Status Area -->
+<div class="w-[1100px] flex items-center justify-start gap-unit-4 font-headline-md text-headline-md">
+<span class="text-white font-bold tracking-widest">LV 1</span>
+<div class="flex items-center gap-unit-2">
+<span class="text-white font-bold text-label-lg font-label-lg">HP</span>
+<div class="w-32 h-6 bg-[#454747] relative border-2 border-white">
+<div class="absolute left-0 top-0 h-full bg-retro-yellow w-full"></div>
+</div>
+</div>
+<span class="text-retro-yellow font-bold">20 / 20</span>
+</div>
+<!-- 3. Middle Area (ACT PANEL) -->
+<div class="w-[1100px] h-[160px] pixel-border-4 border-white bg-black relative flex flex-col">
+<!-- Panel Header -->
+<div class="w-full h-[24px] bg-white flex items-center px-unit-2">
+<span class="text-black font-headline-md text-[16px] font-bold uppercase">* PAPYRUS</span>
+</div>
+<!-- Panel Content (Act Options) -->
+<div class="flex-grow grid grid-cols-2 p-unit-4 gap-y-unit-2">
+<div class="flex items-center gap-unit-2 text-retro-orange font-headline-md text-[20px]">
+<span class="material-symbols-outlined text-retro-orange">play_arrow</span>
+<span class="tracking-widest">CHECK</span>
+</div>
+<div class="flex items-center gap-unit-2 text-on-background font-headline-md text-[20px] hover:text-retro-orange cursor-pointer transition-colors">
+<span class="opacity-0 material-symbols-outlined">play_arrow</span>
+<span class="tracking-widest">TALK</span>
+</div>
+<div class="flex items-center gap-unit-2 text-on-background font-headline-md text-[20px] hover:text-retro-orange cursor-pointer transition-colors">
+<span class="opacity-0 material-symbols-outlined">play_arrow</span>
+<span class="tracking-widest">COMPLIMENT</span>
+</div>
+<div class="flex items-center gap-unit-2 text-on-background font-headline-md text-[20px] hover:text-retro-orange cursor-pointer transition-colors">
+<span class="opacity-0 material-symbols-outlined">play_arrow</span>
+<span class="tracking-widest">JOKE</span>
+</div>
+</div>
+<!-- Panel Footer -->
+<div class="border-t border-white/30 px-unit-2 py-1 flex justify-end">
+<span class="font-label-sm text-label-sm text-secondary tracking-tight">Z to act   •   X to cancel</span>
+</div>
+</div>
+<!-- 4. Bottom Area (Action Buttons) -->
+<div class="w-[1100px] flex justify-between items-center h-16">
+<!-- FIGHT -->
+<button class="w-[240px] h-full pixel-border-2 border-white flex items-center justify-center gap-unit-2 hover:border-retro-orange transition-all">
+<span class="material-symbols-outlined text-white">swords</span>
+<span class="font-headline-md text-headline-md text-white">FIGHT</span>
+</button>
+<!-- ACT (Active State) -->
+<button class="w-[240px] h-full pixel-border-4 border-retro-orange bg-black flex items-center justify-center gap-unit-2 transform translate-y-1">
+<span class="material-symbols-outlined text-retro-orange">forum</span>
+<span class="font-headline-md text-headline-md text-retro-orange">ACT</span>
+</button>
+<!-- ITEM -->
+<button class="w-[240px] h-full pixel-border-2 border-white flex items-center justify-center gap-unit-2 hover:border-retro-orange transition-all">
+<span class="material-symbols-outlined text-white">inventory_2</span>
+<span class="font-headline-md text-headline-md text-white">ITEM</span>
+</button>
+<!-- MERCY -->
+<button class="w-[240px] h-full pixel-border-2 border-white flex items-center justify-center gap-unit-2 hover:border-retro-orange transition-all">
+<span class="material-symbols-outlined text-white">favorite</span>
+<span class="font-headline-md text-headline-md text-white">MERCY</span>
+</button>
+</div>
+</main>
+<!-- Side Navigation (Secondary Navigation Structure) -->
+<nav class="fixed left-0 top-0 h-full w-64 z-40 flex flex-col pt-24 pb-10 border-r-4 border-on-surface bg-background hidden xl:flex">
+<div class="px-unit-4 mb-unit-8">
+<div class="font-headline-md text-headline-md text-primary">OPERATOR_01</div>
+<div class="font-label-lg text-label-lg text-secondary">LVL 99</div>
+</div>
+<div class="flex flex-col gap-unit-4">
+<div class="text-on-surface pl-unit-4 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined">assignment</span> QUESTS
+            </div>
+<div class="text-on-surface pl-unit-4 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined">map</span> MAP
+            </div>
+<div class="text-primary font-bold border-l-4 border-primary pl-unit-2 flex items-center gap-2">
+<span class="material-symbols-outlined">history_edu</span> LOGS
+            </div>
+<div class="text-on-surface pl-unit-4 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined">shield</span> GEAR
+            </div>
+<div class="text-on-surface pl-unit-4 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined">database</span> DATA
+            </div>
+</div>
+</nav>
+<!-- Bottom Bar (Mobile/Standard Navigation) -->
+<footer class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-16 bg-background border-t-4 border-on-surface">
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 flex-1 hover:border-2 hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined">keyboard_command_key</span>
+<span class="font-label-lg text-label-lg">COMMAND</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 flex-1 hover:border-2 hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-lg text-label-lg">STATUS</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary text-background p-unit-2 flex-1 translate-y-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-label-lg text-label-lg">INVENTORY</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 flex-1 hover:border-2 hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-lg text-label-lg">SYSTEM</span>
+</div>
+</footer>
+<!-- SCANLINE OVERLAY -->
+<div class="pointer-events-none fixed inset-0 z-[100] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] bg-[length:100%_4px,3px_100%]"></div>
+</body></html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TERMINAL_RPG_V1.0 - BATTLE_UI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=JetBrains+Mono:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#e2e2e2",
+                        "surface": "#131313",
+                        "primary-container": "#ff9d00",
+                        "surface-bright": "#393939",
+                        "primary": "#ffc485",
+                        "inverse-primary": "#885200",
+                        "tertiary-fixed": "#eaea00",
+                        "surface-container": "#1f1f1f",
+                        "surface-dim": "#131313",
+                        "on-tertiary-container": "#484800",
+                        "inverse-on-surface": "#303030",
+                        "primary-fixed": "#ffdcbb",
+                        "on-primary-fixed": "#2c1700",
+                        "secondary": "#c6c6c7",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface-variant": "#353535",
+                        "surface-container-highest": "#353535",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "on-tertiary": "#323200",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "background": "#000000",
+                        "secondary-container": "#454747",
+                        "surface-container-low": "#1b1b1b",
+                        "primary-fixed-dim": "#ffb869",
+                        "on-surface": "#e2e2e2",
+                        "surface-container-lowest": "#0e0e0e",
+                        "outline-variant": "#544433",
+                        "inverse-surface": "#e2e2e2",
+                        "surface-tint": "#ffb869",
+                        "on-error": "#690005",
+                        "tertiary-container": "#baba00",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-primary-container": "#663c00",
+                        "on-primary": "#482900",
+                        "on-primary-fixed-variant": "#673d00",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary": "#2f3131",
+                        "outline": "#a28d79",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#2a2a2a",
+                        "on-secondary-fixed-variant": "#454747",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-surface-variant": "#dac2ad",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "error": "#ffb4ab",
+                        "tertiary": "#d6d600"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "0px"
+                    },
+                    "spacing": {
+                        "unit-2": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "unit-8": "32px",
+                        "unit-4": "16px",
+                        "unit-1": "4px",
+                        "margin-desktop": "32px",
+                        "base": "4px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Space Mono"],
+                        "headline-lg": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Space Mono"],
+                        "label-lg": ["JetBrains Mono"],
+                        "headline-md": ["Space Mono"]
+                    },
+                    "fontSize": {
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-1px", "fontWeight": "700"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "label-lg": ["14px", {"lineHeight": "16px", "fontWeight": "700"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "0px", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #000000;
+            color: #e2e2e2;
+            image-rendering: pixelated;
+        }
+        .pixel-border-green {
+            border: 4px solid #4ade80;
+        }
+        .pixel-border-white {
+            border: 4px solid #ffffff;
+        }
+        .pixel-border-orange {
+            border: 4px solid #ff9d00;
+        }
+        .hp-bar-bg {
+            background-color: #93000a;
+            width: 100px;
+            height: 24px;
+        }
+        .hp-bar-fill {
+            background-color: #ffff00;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased overflow-hidden">
+<!-- Top AppBar (from JSON Guidance) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-unit-4 py-unit-2 bg-background border-b-4 border-primary">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tighter uppercase">TERMINAL_RPG_V1.0</div>
+<div class="flex gap-unit-4">
+<span class="material-symbols-outlined text-primary" data-icon="terminal">terminal</span>
+<span class="material-symbols-outlined text-primary" data-icon="settings">settings</span>
+</div>
+</header>
+<!-- Main Game Canvas -->
+<main class="flex flex-col items-center justify-center min-h-screen p-unit-8 pt-24 pb-20 max-w-[1200px] mx-auto gap-unit-8">
+<!-- Top Section: Enemy Area (6x2 Grid) -->
+<section class="w-full flex justify-center">
+<div class="pixel-border-green w-full max-w-[800px] aspect-[16/6] flex items-center justify-center relative bg-surface-container-lowest">
+<!-- Enemy Placeholder Graphic -->
+<div class="flex flex-col items-center">
+<img alt="Enemy" class="w-32 h-32 mb-unit-2" data-alt="A pixel-art style skeletal boss monster with glowing red eyes, standing in a dark, void-like environment. The art is strictly 8-bit aesthetic with sharp edges and no gradients, primarily using black, white, and neon green colors to match the terminal RPG theme. The lighting is harsh and direct, coming from below to create a menacing shadow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDGmqfoJw-j1FZiW-4i50fxQh4l-h5e81gfwbnPBJC92AJu1Hkc7xMqCjbUu0-B4LaERFpDQjqagnc4_k7j4qn5Grz99Y_oBf8RcY8FKojsKW_c2QsKJRH4uuRDjuiNBDJKP5mqaE8KXEt8eagXWR7FNQhG4xaEEVmCubpNq_yqAZPKROUeNrmC30v5YTvS2gN4POfi4N07p09MWjSkjnaXlstFMbAI7igUo2aV0FCS38tNrW9r8bAmL2AJQd9Sb289zBFZE0cDC7F"/>
+<div class="font-headline-md text-headline-md text-primary uppercase">OPERATOR_VOID</div>
+</div>
+<!-- Grid Overlay -->
+<div class="absolute inset-0 grid grid-cols-6 grid-rows-2 opacity-10 pointer-events-none">
+<div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div>
+<div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div><div class="border border-green-400"></div>
+</div>
+</div>
+</section>
+<!-- Middle Section: HP Area -->
+<section class="w-full max-w-[1100px] flex items-center justify-start gap-unit-8 font-headline-md text-headline-md">
+<span class="text-on-background">OPERATOR_01</span>
+<span class="text-on-background">LV 99</span>
+<div class="flex items-center gap-unit-2">
+<span class="text-label-lg font-label-lg">HP</span>
+<div class="hp-bar-bg border-2 border-on-background">
+<div class="hp-bar-fill"></div>
+</div>
+<span class="text-on-background ml-unit-2">20 / 20</span>
+</div>
+</section>
+<!-- Central Dialogue Area: Inventory Submenu -->
+<section class="w-full max-w-[1100px]">
+<div class="pixel-border-white bg-background p-unit-4 min-h-[220px] flex flex-col justify-between">
+<!-- Inventory Grid -->
+<div class="grid grid-cols-2 gap-x-12 gap-y-unit-2">
+<!-- Row 1 -->
+<div class="flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-unit-2">
+<span class="text-primary-container">▶</span>
+<span class="text-primary-container font-headline-md">HEALTH POTION</span>
+</div>
+<span class="font-label-lg text-label-lg text-primary opacity-80">20 HP</span>
+</div>
+<div class="flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-unit-2">
+<span class="text-transparent">▶</span>
+<span class="text-on-background font-headline-md">IRON SWORD</span>
+</div>
+<span class="font-label-lg text-label-lg text-secondary opacity-80">+5 ATK</span>
+</div>
+<!-- Row 2 -->
+<div class="flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-unit-2">
+<span class="text-transparent">▶</span>
+<span class="text-on-background font-headline-md">DAGGER</span>
+</div>
+<span class="font-label-lg text-label-lg text-secondary opacity-80">+2 ATK</span>
+</div>
+<div class="flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-unit-2">
+<span class="text-transparent">▶</span>
+<span class="text-on-background font-headline-md">WORN SHIELD</span>
+</div>
+<span class="font-label-lg text-label-lg text-secondary opacity-80">+3 DEF</span>
+</div>
+<!-- Row 3 -->
+<div class="flex justify-between items-center group cursor-pointer">
+<div class="flex items-center gap-unit-2">
+<span class="text-transparent">▶</span>
+<span class="text-on-background font-headline-md">PHASE 2 POTION</span>
+</div>
+<span class="font-label-lg text-label-lg text-primary opacity-80">30 HP</span>
+</div>
+<div class="flex justify-between items-center group">
+<div class="flex items-center gap-unit-2">
+<span class="text-transparent">▶</span>
+<span class="text-outline font-headline-md">---EMPTY---</span>
+</div>
+<span class="font-label-lg text-label-lg text-outline opacity-80">--</span>
+</div>
+</div>
+<!-- Bottom Hint -->
+<div class="mt-unit-4">
+<div class="w-full h-[1px] bg-on-background mb-unit-2 opacity-50"></div>
+<div class="flex justify-between items-center font-label-lg text-label-lg text-on-surface-variant">
+<span class="uppercase tracking-widest">USE • [Z] SELECT • [X] CANCEL</span>
+<span class="material-symbols-outlined animate-pulse" data-icon="arrow_drop_down">arrow_drop_down</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section: Action Buttons -->
+<section class="w-full max-w-[1100px] grid grid-cols-4 gap-unit-4">
+<!-- FIGHT -->
+<button class="pixel-border-orange py-unit-2 flex items-center justify-center gap-unit-2 transition-transform active:scale-95 group hover:bg-surface-variant">
+<span class="material-symbols-outlined text-primary-container" data-icon="swords">swords</span>
+<span class="font-headline-md text-headline-md text-primary-container">FIGHT</span>
+</button>
+<!-- ACT -->
+<button class="pixel-border-orange py-unit-2 flex items-center justify-center gap-unit-2 transition-transform active:scale-95 group hover:bg-surface-variant">
+<span class="material-symbols-outlined text-primary-container" data-icon="forum">forum</span>
+<span class="font-headline-md text-headline-md text-primary-container">ACT</span>
+</button>
+<!-- ITEM (ACTIVE) -->
+<button class="bg-primary-container py-unit-2 flex items-center justify-center gap-unit-2 translate-y-1 ring-4 ring-primary-container">
+<span class="material-symbols-outlined text-background" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-headline-md text-headline-md text-background">ITEM</span>
+</button>
+<!-- MERCY -->
+<button class="pixel-border-orange py-unit-2 flex items-center justify-center gap-unit-2 transition-transform active:scale-95 group hover:bg-surface-variant">
+<span class="material-symbols-outlined text-primary-container" data-icon="volunteer_activism">volunteer_activism</span>
+<span class="font-headline-md text-headline-md text-primary-container">MERCY</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar (from JSON Guidance) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-stretch h-16 bg-background border-t-4 border-on-surface">
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 hover:border-2 hover:border-primary cursor-pointer w-full">
+<span class="material-symbols-outlined" data-icon="keyboard_command_key">keyboard_command_key</span>
+<span class="font-label-lg text-label-lg">COMMAND</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 hover:border-2 hover:border-primary cursor-pointer w-full">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+<span class="font-label-lg text-label-lg">STATUS</span>
+</div>
+<!-- Active Tab: INVENTORY/ITEM -->
+<div class="flex flex-col items-center justify-center bg-primary text-background p-unit-2 w-full">
+<span class="material-symbols-outlined" data-icon="inventory_2" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-label-lg text-label-lg">INVENTORY</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 hover:border-2 hover:border-primary cursor-pointer w-full">
+<span class="material-symbols-outlined" data-icon="settings_input_component">settings_input_component</span>
+<span class="font-label-lg text-label-lg">SYSTEM</span>
+</div>
+</nav>
+<!-- SideNavBar (from JSON Guidance - Hidden on small screens, desktop focus) -->
+<aside class="hidden lg:flex fixed left-0 top-0 h-full w-64 z-40 flex-col pt-20 pb-10 bg-background border-r-4 border-on-surface">
+<div class="px-unit-4 mb-unit-8">
+<div class="font-headline-md text-headline-md text-primary uppercase">OPERATOR_01</div>
+<div class="font-label-lg text-label-lg text-on-surface-variant">LVL 99</div>
+</div>
+<nav class="flex flex-col gap-unit-2">
+<div class="text-on-surface pl-unit-4 py-unit-1 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-unit-2">
+<span class="material-symbols-outlined" data-icon="assignment">assignment</span>
+<span class="font-label-lg text-label-lg">QUESTS</span>
+</div>
+<div class="text-on-surface pl-unit-4 py-unit-1 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-unit-2">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-label-lg text-label-lg">MAP</span>
+</div>
+<div class="text-on-surface pl-unit-4 py-unit-1 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-unit-2">
+<span class="material-symbols-outlined" data-icon="history_edu">history_edu</span>
+<span class="font-label-lg text-label-lg">LOGS</span>
+</div>
+<div class="text-primary font-bold border-l-4 border-primary pl-unit-2 py-unit-1 flex items-center gap-unit-2">
+<span class="material-symbols-outlined" data-icon="shield">shield</span>
+<span class="font-label-lg text-label-lg">GEAR</span>
+</div>
+<div class="text-on-surface pl-unit-4 py-unit-1 hover:text-primary hover:pl-6 transition-all cursor-pointer flex items-center gap-unit-2">
+<span class="material-symbols-outlined" data-icon="database">database</span>
+<span class="font-label-lg text-label-lg">DATA</span>
+</div>
+</nav>
+</aside>
+</body></html>

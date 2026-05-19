@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TERMINAL_RPG_V1.0 - VICTORY</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&amp;family=JetBrains+Mono:wght@400;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#1b1b1b",
+                        "surface-bright": "#393939",
+                        "surface-variant": "#353535",
+                        "on-primary-container": "#663c00",
+                        "inverse-on-surface": "#303030",
+                        "surface-container-highest": "#353535",
+                        "secondary": "#c6c6c7",
+                        "primary-fixed": "#ffdcbb",
+                        "secondary-fixed": "#e2e2e2",
+                        "inverse-surface": "#e2e2e2",
+                        "secondary-fixed-dim": "#c6c6c7",
+                        "on-tertiary-container": "#484800",
+                        "surface-tint": "#ffb869",
+                        "surface-container": "#1f1f1f",
+                        "on-tertiary-fixed-variant": "#494900",
+                        "primary-container": "#ff9d00",
+                        "tertiary": "#d6d600",
+                        "on-secondary-fixed-variant": "#454747",
+                        "on-primary-fixed-variant": "#673d00",
+                        "on-surface": "#e2e2e2",
+                        "error-container": "#93000a",
+                        "surface-container-high": "#2a2a2a",
+                        "outline-variant": "#544433",
+                        "on-secondary-container": "#b4b5b5",
+                        "on-primary-fixed": "#2c1700",
+                        "on-background": "#e2e2e2",
+                        "secondary-container": "#454747",
+                        "inverse-primary": "#885200",
+                        "surface-dim": "#131313",
+                        "outline": "#a28d79",
+                        "on-tertiary": "#323200",
+                        "on-error": "#690005",
+                        "tertiary-fixed": "#eaea00",
+                        "tertiary-fixed-dim": "#cdcd00",
+                        "surface-container-lowest": "#0e0e0e",
+                        "primary-fixed-dim": "#ffb869",
+                        "on-tertiary-fixed": "#1d1d00",
+                        "on-error-container": "#ffdad6",
+                        "surface": "#131313",
+                        "on-secondary": "#2f3131",
+                        "on-primary": "#482900",
+                        "background": "#131313",
+                        "tertiary-container": "#baba00",
+                        "on-secondary-fixed": "#1a1c1c",
+                        "error": "#ffb4ab",
+                        "primary": "#ffc485",
+                        "on-surface-variant": "#dac2ad"
+                    },
+                    "spacing": {
+                        "unit-4": "16px",
+                        "margin-mobile": "16px",
+                        "base": "4px",
+                        "margin-desktop": "32px",
+                        "unit-8": "32px",
+                        "unit-2": "8px",
+                        "unit-1": "4px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Space Mono"],
+                        "body-md": ["Space Mono"],
+                        "label-sm": ["JetBrains Mono"],
+                        "headline-md": ["Space Mono"],
+                        "body-lg": ["Space Mono"],
+                        "label-lg": ["JetBrains Mono"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #000000;
+            cursor: crosshair;
+            overflow: hidden;
+        }
+        .crt-overlay {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+        .scanline {
+            width: 100%;
+            height: 100px;
+            background: linear-gradient(0deg, rgba(0, 0, 0, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(0, 0, 0, 0) 100%);
+            opacity: 0.1;
+            position: absolute;
+            bottom: 100%;
+        }
+    </style>
+</head>
+<body class="text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<!-- CRT Visual Effects Layer -->
+<div class="fixed inset-0 crt-overlay z-[100]"></div>
+<!-- Navigation Shell (TopAppBar) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-unit-4 py-unit-2 bg-background border-b-4 border-primary">
+<div class="font-headline-md text-headline-md font-bold text-primary tracking-tighter">
+            TERMINAL_RPG_V1.0
+        </div>
+<div class="flex gap-unit-4">
+<button class="flex items-center justify-center p-unit-1 hover:bg-surface-variant transition-transform active:scale-95">
+<span class="material-symbols-outlined text-primary">terminal</span>
+</button>
+<button class="flex items-center justify-center p-unit-1 hover:bg-surface-variant transition-transform active:scale-95">
+<span class="material-symbols-outlined text-primary">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="w-full h-screen flex flex-col items-center justify-center p-unit-8 mt-16 pb-24">
+<!-- Victory Header Section -->
+<div class="text-center mb-unit-8 w-full max-w-[1280px]">
+<h1 class="font-headline-lg text-[64px] leading-tight font-bold text-[#FF9D00] tracking-[4px]">
+                THE END
+            </h1>
+<h2 class="font-headline-md text-[24px] text-tertiary mt-unit-2 tracking-[2px]">
+                ROUTE: NEUTRAL
+            </h2>
+<div class="w-full h-[4px] bg-[#FFFFFF] mt-unit-8"></div>
+</div>
+<!-- Central Narrative Panel -->
+<section class="w-4/5 max-w-[1024px] h-[300px] border-[4px] border-primary-container bg-[#000000] p-unit-8 relative mb-unit-8 flex items-center">
+<div class="absolute -top-4 left-unit-4 bg-[#000000] px-unit-2">
+<span class="font-label-lg text-label-lg text-primary">NARRATIVE_LOG</span>
+</div>
+<p class="font-body-lg text-body-lg text-on-surface leading-relaxed">
+                Your journey ends in shades of gray. Some you spared. Some you struck down. The world remembers all of it — the mercy and the violence alike. Perhaps next time, the path will be clearer.
+            </p>
+<!-- Dialogue Box Style Indicator -->
+<div class="absolute bottom-unit-4 right-unit-4">
+<span class="material-symbols-outlined text-primary-container animate-pulse" style="font-variation-settings: 'FILL' 1;">arrow_drop_down</span>
+</div>
+</section>
+<!-- Stats Section -->
+<div class="flex flex-row gap-unit-4 mb-unit-8">
+<!-- Cell 1: SPARED -->
+<div class="w-[200px] h-[100px] border-[2px] border-on-surface flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-lg text-label-lg text-on-surface mb-unit-1">SPARED</span>
+<span class="font-headline-md text-[24px] text-primary">3</span>
+</div>
+<!-- Cell 2: DEFEATED -->
+<div class="w-[200px] h-[100px] border-[2px] border-on-surface flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-lg text-label-lg text-on-surface mb-unit-1">DEFEATED</span>
+<span class="font-headline-md text-[24px] text-error">2</span>
+</div>
+<!-- Cell 3: TIME -->
+<div class="w-[200px] h-[100px] border-[2px] border-on-surface flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-lg text-label-lg text-on-surface mb-unit-1">TIME</span>
+<span class="font-headline-md text-[24px] text-on-surface">24:31</span>
+</div>
+</div>
+<!-- Call to Action (Button) -->
+<footer class="w-full max-w-[400px]">
+<button class="w-full py-unit-4 border-[4px] border-on-surface bg-transparent hover:border-primary-container hover:text-primary-container transition-all active:translate-y-1 group">
+<span class="font-headline-md text-headline-md text-on-surface group-hover:text-primary-container">
+                    ← RETURN TO MAIN MENU
+                </span>
+</button>
+</footer>
+</main>
+<!-- SideNavBar (Contextual Navigation - Suppressed due to Transactional state, but structured for grid alignment if needed) -->
+<!-- Suppression Logic: High priority page focus, navigation hidden to emphasize ending -->
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-16 z-50 flex justify-around items-stretch bg-background border-t-4 border-on-surface">
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 w-full hover:border-2 hover:border-primary">
+<span class="material-symbols-outlined">keyboard_command_key</span>
+<span class="font-label-lg text-label-lg">COMMAND</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 w-full hover:border-2 hover:border-primary">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-lg text-label-lg">STATUS</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface p-unit-2 w-full hover:border-2 hover:border-primary">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-lg text-label-lg">INVENTORY</span>
+</div>
+<!-- Active Tab: SYSTEM -->
+<div class="flex flex-col items-center justify-center bg-primary text-background p-unit-2 w-full translate-y-1">
+<span class="material-symbols-outlined">settings_input_component</span>
+<span class="font-label-lg text-label-lg">SYSTEM</span>
+</div>
+</nav>
+<!-- Aesthetic Decorative Elements -->
+<div class="fixed top-0 left-0 w-unit-2 h-full bg-primary-container opacity-10"></div>
+<div class="fixed top-0 right-0 w-unit-2 h-full bg-primary-container opacity-10"></div>
+</body></html>

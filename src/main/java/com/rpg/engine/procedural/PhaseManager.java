@@ -87,9 +87,10 @@ public class PhaseManager implements Persistable {
         try {
             PhaseManagerSaveDto dto = JsonUtil.fromJson(data, PhaseManagerSaveDto.class);
             if (dto == null)
-                throw new SaveCorruptionException("PhaseManager save data is null");
+                throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "PhaseManager save data is null");
             if (dto.currentPhase() < 0 || dto.currentPhase() > MAX_PHASES)
                 throw new SaveCorruptionException(
+                    SaveCorruptionException.UNKNOWN_SLOT,
                     "currentPhase out of bounds [0," + MAX_PHASES + "]: " + dto.currentPhase());
 
             this.currentPhase = dto.currentPhase();
@@ -97,7 +98,7 @@ public class PhaseManager implements Persistable {
         } catch (SaveCorruptionException e) {
             throw e;
         } catch (Exception e) {
-            throw new SaveCorruptionException("Failed to parse PhaseManager: " + e.getMessage(), e);
+            throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "Failed to parse PhaseManager: " + e.getMessage(), e);
         }
     }
 

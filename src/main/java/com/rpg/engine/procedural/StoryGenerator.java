@@ -2,20 +2,6 @@ package com.rpg.engine.procedural;
 
 import com.rpg.engine.entities.Boss;
 
-/**
- * Genera texto narrativo contextualizado según el historial de decisiones del jugador.
- *
- * Es una "vista derivada" de HistoryManager: no tiene estado propio, no implementa
- * Persistable y no persiste nada. Recalcula la ruta en cada llamada leyendo el historial.
- *
- * Dos responsabilidades:
- *   1. getCurrentRoute()              → clasifica la partida en PACIFIC / NEUTRAL / GENOCIDE.
- *   2. generateNarrativeForPhase()    → texto introductorio de cada fase según la ruta.
- *   3. generateBossIntroDialogue()    → presentación del boss contextualizada por la ruta.
- *
- * Los textos son mock (tablas en código). En una versión final se cargarían desde
- * un archivo de localización (JSON / properties) para separar contenido de lógica.
- */
 public class StoryGenerator {
 
     private final HistoryManager history;
@@ -24,21 +10,7 @@ public class StoryGenerator {
         this.history = history;
     }
 
-    // -------------------------------------------------------------------------
-    // Clasificación de ruta
-    // -------------------------------------------------------------------------
 
-    /**
-     * Determina la ruta narrativa actual basándose en el historial completo.
-     *
-     * Reglas:
-     *   - Sin historial (inicio de partida) → NEUTRAL.
-     *   - Todos los encuentros terminaron en MERCY          → PACIFIC.
-     *   - Todos los encuentros terminaron en derrota        → GENOCIDE.
-     *   - Cualquier otra combinación                        → NEUTRAL.
-     *
-     * @return la ruta narrativa actual
-     */
     public Route getCurrentRoute() {
         int total  = history.getRecords().size();
         if (total == 0) return Route.NEUTRAL;
@@ -51,16 +23,7 @@ public class StoryGenerator {
         return Route.NEUTRAL;
     }
 
-    // -------------------------------------------------------------------------
-    // Generación de narrativa
-    // -------------------------------------------------------------------------
 
-    /**
-     * Genera el texto narrativo introductorio de una fase según la ruta activa.
-     *
-     * @param phase número de fase (1–5)
-     * @return texto narrativo para mostrar al inicio del encuentro
-     */
     public String generateNarrativeForPhase(int phase) {
         return switch (getCurrentRoute()) {
             case PACIFIC -> pacificNarrative(phase);
@@ -69,14 +32,6 @@ public class StoryGenerator {
         };
     }
 
-    /**
-     * Genera el diálogo de presentación de un boss contextualizado por la ruta.
-     * El boss ya tiene su propio repertorio de diálogos (nextDialogue()),
-     * pero este texto lo enmarca antes de que empiece el combate.
-     *
-     * @param boss el boss que va a enfrentarse al jugador
-     * @return texto de presentación del boss
-     */
     public String generateBossIntroDialogue(Boss boss) {
         return switch (getCurrentRoute()) {
             case PACIFIC   -> boss.getName() + " te observa con cautela. "
@@ -88,9 +43,6 @@ public class StoryGenerator {
         };
     }
 
-    // -------------------------------------------------------------------------
-    // Textos por ruta (mock — extraer a archivo de localización en producción)
-    // -------------------------------------------------------------------------
 
     private String pacificNarrative(int phase) {
         return switch (phase) {

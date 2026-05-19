@@ -203,13 +203,13 @@ public class Player extends Character implements Persistable {
             PlayerSaveDto dto = JsonUtil.fromJson(data, PlayerSaveDto.class);
 
             if (dto == null)
-                throw new SaveCorruptionException("Player save data parsed as null");
+                throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "Player save data parsed as null");
             if (dto.name() == null || dto.name().isBlank())
-                throw new SaveCorruptionException("name cannot be blank");
+                throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "name cannot be blank");
             if (dto.maxHp() <= 0)
-                throw new SaveCorruptionException("maxHp must be > 0, got: " + dto.maxHp());
+                throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "maxHp must be > 0, got: " + dto.maxHp());
             if (dto.hp() < 0 || dto.hp() > dto.maxHp())
-                throw new SaveCorruptionException("hp out of bounds: " + dto.hp() + "/" + dto.maxHp());
+                throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "hp out of bounds: " + dto.hp() + "/" + dto.maxHp());
 
             // validaciones superadas — mutamos los campos (atomicidad)
             this.name        = dto.name();
@@ -226,7 +226,7 @@ public class Player extends Character implements Persistable {
         } catch (SaveCorruptionException e) {
             throw e; // relanzar sin envolver
         } catch (Exception e) {
-            throw new SaveCorruptionException("Failed to parse Player JSON: " + e.getMessage(), e);
+            throw new SaveCorruptionException(SaveCorruptionException.UNKNOWN_SLOT, "Failed to parse Player JSON: " + e.getMessage(), e);
         }
     }
 

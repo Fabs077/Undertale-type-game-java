@@ -2,28 +2,14 @@
 setlocal
 
 set PROJECT=c:\Users\f4b10\OneDrive\Desktop\ProyectoPrograII
-set SRC=%PROJECT%\src\main\java
-set OUT=%PROJECT%\target\classes
-set GSON=%USERPROFILE%\.m2\repository\com\google\code\gson\gson\2.10.1\gson-2.10.1.jar
+cd /d "%PROJECT%"
 
-:: Crear carpeta de salida
-if not exist "%OUT%" mkdir "%OUT%"
-
-:: Recopilar todos los .java
-dir /s /b "%SRC%\*.java" > "%PROJECT%\sources.txt"
-
-:: Compilar
-echo Compilando...
-javac -encoding UTF-8 -cp "%GSON%" -d "%OUT%" @"%PROJECT%\sources.txt"
-if errorlevel 1 (
-    echo.
-    echo ERROR: fallo en la compilacion. Revisa los mensajes anteriores.
-    pause
-    exit /b 1
+if "%1"=="console" (
+    echo Ejecutando ConsoleTests del motor...
+    call mvn -q compile exec:java -Dexec.mainClass=com.rpg.engine.ConsoleTests
+) else (
+    echo Compilando y ejecutando UI ^(DesktopLauncher^)...
+    call mvn compile exec:java
 )
-
-:: Ejecutar
-echo.
-java -cp "%OUT%;%GSON%" com.rpg.engine.Main
 
 endlocal
