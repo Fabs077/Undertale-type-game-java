@@ -7,6 +7,8 @@ import com.rpg.ui.screens.CombatScreen;
 import com.rpg.ui.screens.DialogueScreen;
 import com.rpg.ui.screens.GameOverScreen;
 import com.rpg.ui.screens.MainMenuScreen;
+import com.rpg.ui.bridge.CombatController;
+import com.rpg.ui.screens.PostBossScreen;
 import com.rpg.ui.screens.VictoryScreen;
 import com.rpg.ui.theme.Fonts;
 
@@ -25,6 +27,7 @@ public class RpgGame extends Game {
     public void goToDialogue(int phase) { setScreen(new DialogueScreen(this, phase)); }
     public void goToCombat()            { setScreen(new CombatScreen(this)); }
     public void goToGameOver()          { setScreen(new GameOverScreen(this)); }
+    public void goToPostBoss(CombatController ctrl) { setScreen(new PostBossScreen(this, ctrl)); }
     public void goToVictory()           { setScreen(new VictoryScreen(this)); }
     public void goToMainMenu()          { setScreen(new MainMenuScreen(this)); }
 

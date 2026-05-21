@@ -28,8 +28,8 @@ public class CombatManager {
         initialState.onEnter(this);
     }
 
-    public void executeAction(CombatAction action) {
-        currentState.handleAction(action, this);
+    public ActionResult executeAction(CombatAction action) {
+        return currentState.handleAction(action, this);
     }
 
     public void changeState(CombatState newState) {

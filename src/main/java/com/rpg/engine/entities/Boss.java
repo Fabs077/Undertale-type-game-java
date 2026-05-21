@@ -200,4 +200,9 @@ public class Boss extends Enemy {
     public int getPhaseLevel()                 { return phaseLevel; }
     public int getActsPerformed()              { return actsPerformed; }
     public ArrayList<String> getDialogues()     { return new ArrayList<>(dialogues); }
+
+    /** Carpeta de sprites: sprites/bosses/{spriteId}/ — derivado del nombre del boss. */
+    public String getSpriteId() {
+        return name.toLowerCase().replace(" ", "_");
+    }
 }

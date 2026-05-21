@@ -3,13 +3,13 @@
 ## Visión general
 Motor de juego **puramente lógico** en Java para un RPG por turnos inspirado en Undertale: combate FIGHT/ACT/ITEM/MERCY, generación procedimental de jefes a lo largo de 5 fases, sistema de botín polimórfico y rutas narrativas (pacífica / neutral / genocida) derivadas del historial de decisiones.
 
-El objetivo intermedio es un **MVP lógico excelente** validable con consola y JUnit. La UI se construirá después en **FXGL**, una vez la lógica esté cerrada. Hasta entonces, **cero imports** de `javafx.*` o `com.almasb.fxgl.*` en el código del motor.
+El objetivo intermedio es un **MVP lógico excelente** validable con consola y JUnit. La UI se construye en **libGDX 1.12.1** (backend LWJGL3), en el paquete `com.rpg.ui` separado del motor. **Cero imports** de `com.badlogic.gdx.*` en el código del motor (`com.rpg.engine.*`).
 
 ## Stack
 - **Lenguaje:** Java (recomendado JDK 17+).
 - **Tests:** JUnit 5.
 - **Persistencia:** JSON en memoria (Jackson o Gson, encapsulado en una sola capa de serialización).
-- **UI futura:** FXGL — fuera del motor, en un módulo aparte cuando llegue el momento.
+- **UI:** libGDX 1.12.1 + LWJGL3 — paquete `com.rpg.ui`, separado del motor lógico.
 
 ## Arquitectura
 

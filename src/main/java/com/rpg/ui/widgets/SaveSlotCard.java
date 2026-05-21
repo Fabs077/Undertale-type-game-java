@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.rpg.ui.bridge.SaveSlotInfo;
 import com.rpg.ui.theme.Fonts;
 import com.rpg.ui.theme.Palette;
 
@@ -20,8 +21,9 @@ public class SaveSlotCard {
     private final String      slotLabel;
     private final GlyphLayout slotLayout;
 
-    private boolean selected;
-    private boolean corrupted;
+    private boolean      selected;
+    private boolean      corrupted;
+    private SaveSlotInfo info;
 
     public SaveSlotCard(int slotIndex, float x, float y) {
         this.x          = x;
@@ -31,10 +33,11 @@ public class SaveSlotCard {
     }
 
     public void render(ShapeRenderer shapes, SpriteBatch batch) {
+        boolean showCorrupted = corrupted || (info != null && info.corrupted());
+
         Color borderColor;
         int   bw;
-
-        if (corrupted) {
+        if (showCorrupted) {
             borderColor = Palette.ERROR;
             bw          = BORDER_NORMAL;
         } else if (selected) {
@@ -53,15 +56,32 @@ public class SaveSlotCard {
         shapes.end();
 
         batch.begin();
-        if (corrupted) {
-            // Title in upper portion, warning below
+        if (showCorrupted) {
             Fonts.sansLarge.setColor(Palette.ON_SURFACE);
             Fonts.sansLarge.draw(batch, slotLabel, x + PAD, y + HEIGHT - 18f);
-
             Fonts.sansMedium.setColor(Palette.ERROR);
             Fonts.sansMedium.draw(batch, "! ARCHIVO CORRUPTO – no se puede cargar", x + PAD, y + 38f);
+
+        } else if (info != null && info.empty()) {
+            Fonts.sansLarge.setColor(selected ? Palette.PRIMARY : Palette.ON_SURFACE);
+            Fonts.sansLarge.draw(batch, slotLabel, x + PAD, y + HEIGHT - 18f);
+            Fonts.sansMedium.setColor(Palette.SECONDARY);
+            Fonts.sansMedium.draw(batch, "--- VACÍO ---", x + PAD, y + 38f);
+
+        } else if (info != null) {
+            // Slot con datos: nombre + fase arriba, timestamp abajo-derecha
+            Fonts.sansLarge.setColor(selected ? Palette.PRIMARY : Palette.ON_SURFACE);
+            Fonts.sansLarge.draw(batch, slotLabel, x + PAD, y + HEIGHT - 18f);
+
+            String summary = info.playerName() + "  —  FASE " + info.phase();
+            Fonts.sansMedium.setColor(selected ? Palette.PRIMARY : Palette.ON_SURFACE);
+            Fonts.sansMedium.draw(batch, summary, x + PAD, y + 38f);
+
+            Fonts.monoTiny.setColor(Palette.SECONDARY);
+            Fonts.monoTiny.draw(batch, info.timestamp(), x + WIDTH - 180f, y + 38f);
+
         } else {
-            // Vertically centered title
+            // Info aún no cargada: comportamiento original (solo título centrado)
             float titleY = y + (HEIGHT + slotLayout.height) / 2f;
             Fonts.sansLarge.setColor(selected ? Palette.PRIMARY : Palette.ON_SURFACE);
             Fonts.sansLarge.draw(batch, slotLabel, x + PAD, titleY);
@@ -69,8 +89,13 @@ public class SaveSlotCard {
         batch.end();
     }
 
+    public void setInfo(SaveSlotInfo info) {
+        this.info = info;
+        if (info != null && info.corrupted()) this.corrupted = true;
+    }
+
     public void setSelected(boolean selected)   { this.selected  = selected; }
     public void setCorrupted(boolean corrupted) { this.corrupted = corrupted; }
     public boolean isSelected()                 { return selected; }
-    public boolean isCorrupted()                { return corrupted; }
+    public boolean isCorrupted()                { return corrupted || (info != null && info.corrupted()); }
 }

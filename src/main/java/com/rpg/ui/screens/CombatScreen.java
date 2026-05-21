@@ -6,9 +6,13 @@ import com.rpg.engine.combat.ActionResult;
 import com.rpg.ui.RpgGame;
 import com.rpg.ui.bridge.CombatController;
 import com.rpg.ui.combat.Bullet;
+import com.rpg.ui.combat.BossAssets;
+import com.rpg.ui.combat.BossRenderer;
+import com.rpg.ui.combat.KennyBossAssets;
 import com.rpg.ui.combat.BulletPattern;
 import com.rpg.ui.combat.CombatBox;
 import com.rpg.ui.combat.Soul;
+import com.rpg.ui.combat.patterns.KennyMousePattern;
 import com.rpg.ui.combat.patterns.RadialSpreadPattern;
 import com.rpg.ui.input.PlayerInputAdapter;
 import com.rpg.ui.widgets.ActionMenu;
@@ -34,12 +38,9 @@ public class CombatScreen extends BaseScreen {
     private static final float HPBAR_Y      = ACTION_Y + ACTION_H + 12f;  // 92
     private static final float BOX_CENTER_X = SCREEN_W / 2f;
     private static final float BOX_CENTER_Y = (ENEMY_ZONE_Y + HPBAR_Y + 28f) / 2f;
-    private static final int   GRID_COLS    = 6;
-    private static final int   GRID_ROWS    = 2;
-
     // ── infrastructure ─────────────────────────────────────────────────────
-    private final PlayerInputAdapter input      = new PlayerInputAdapter();
-    private final CombatController   controller = new CombatController();
+    private final PlayerInputAdapter input = new PlayerInputAdapter();
+    private final CombatController   controller;
 
     // ── widgets ────────────────────────────────────────────────────────────
     private final CombatBox          combatBox;
@@ -49,6 +50,7 @@ public class CombatScreen extends BaseScreen {
     private final ItemListWidget     itemList       = new ItemListWidget();
     private final ActListWidget      actList        = new ActListWidget();
     private final SaveExitDialog     saveExitDialog = new SaveExitDialog();
+    private final BossRenderer        bossSprite;
 
     private State         state = State.MENU;
     private Soul          soul;
@@ -60,12 +62,32 @@ public class CombatScreen extends BaseScreen {
     // Balas que ya golpearon al alma en este bullet hell (evita multi-hit)
     private final HashSet<Bullet> hitBullets = new HashSet<>();
 
+    // Posición y tamaño del sprite del boss en la zona superior
+    private static final float BOSS_W = 200f;
+    private static final float BOSS_H = 200f;
+    private static final float BOSS_X = (SCREEN_W - BOSS_W) / 2f;
+    private static final float BOSS_Y = ENEMY_ZONE_Y + (SCREEN_H - ENEMY_ZONE_Y - BOSS_H) / 2f;
+
+    /** Partida nueva. */
     public CombatScreen(RpgGame game) {
+        this(game, new CombatController());
+    }
+
+    /** Partida cargada desde un save (controller con estado pre-restaurado). */
+    public CombatScreen(RpgGame game, CombatController controller) {
         super(game);
+        this.controller = controller;
         combatBox  = new CombatBox(BOX_CENTER_X, BOX_CENTER_Y);
         hpBar      = new HpBar(1, controller.getPlayerHp(), controller.getPlayerMaxHp());
         actionMenu = new ActionMenu(ACTION_Y);
         actList.setBossName(controller.getBossName());
+        bossSprite = buildBossRenderer(controller.getBossSpriteId());
+    }
+
+    @Override
+    public void dispose() {
+        bossSprite.dispose();
+        if (activePattern != null) activePattern.dispose();
     }
 
     // ── render loop ────────────────────────────────────────────────────────
@@ -76,8 +98,9 @@ public class CombatScreen extends BaseScreen {
         if (state == State.DIALOGUE)    dialogueBox.update(delta);
         if (state == State.BULLET_HELL) updateBulletHell(delta);
 
-        // Enemy zone placeholder (always visible — PAUSED dialog covers it)
-        drawEnemyGrid();
+        if (state == State.BULLET_HELL) drawEnemyGrid();
+        bossSprite.update(delta);
+        bossSprite.render(game.batch, BOSS_X, BOSS_Y, BOSS_W, BOSS_H);
 
         // Combat box visible except when submenus/dialog cover it completely
         boolean showCombatBox = state == State.MENU
@@ -198,7 +221,8 @@ public class CombatScreen extends BaseScreen {
         switch (actionMenu.getSelectedIndex()) {
             case 0 -> {
                 ActionResult result = controller.executeFight();
-                if (result.isCombatEnded()) showDialogue(result.getMessage(), game::goToVictory);
+                bossSprite.playOnce("hurt");
+                if (result.isCombatEnded()) showDialogue(result.getMessage(), () -> game.goToPostBoss(controller));
                 else showDialogue(result.getMessage(), this::enterBulletHell);
             }
             case 1 -> {
@@ -213,7 +237,7 @@ public class CombatScreen extends BaseScreen {
             }
             case 3 -> {
                 ActionResult result = controller.executeMercy();
-                if (result.isCombatEnded()) showDialogue(result.getMessage(), game::goToVictory);
+                if (result.isCombatEnded()) showDialogue(result.getMessage(), () -> game.goToPostBoss(controller));
                 else showDialogue(result.getMessage(), this::enterBulletHell);
             }
         }
@@ -232,20 +256,28 @@ public class CombatScreen extends BaseScreen {
     }
 
     private void enterBulletHell() {
+        if (activePattern != null) activePattern.dispose();
         combatBox.setMode(CombatBox.Mode.WIDE);
         hitBullets.clear();
         soul = new Soul(
             combatBox.getInnerX() + combatBox.getInnerWidth()  / 2f,
             combatBox.getInnerY() + combatBox.getInnerHeight() / 2f
         );
-        activePattern = new RadialSpreadPattern();
+        activePattern = createPattern(controller.getActivePatternId(), soul);
         activePattern.start(combatBox);
+        bossSprite.playOnce("attack");
         state = State.BULLET_HELL;
     }
 
     private void exitBulletHell() {
         combatBox.setMode(CombatBox.Mode.NARROW);
+        controller.notifyBulletHellComplete();
         state = State.MENU;
+    }
+
+    /** Maps a boss pattern id to the corresponding BulletPattern implementation. */
+    private BulletPattern createPattern(String id, Soul soul) {
+        return new KennyMousePattern(soul);
     }
 
     // ── helpers ────────────────────────────────────────────────────────────
@@ -253,18 +285,24 @@ public class CombatScreen extends BaseScreen {
     private void updateBulletHell(float delta) {
         activePattern.update(delta);
         soul.update(delta, combatBox);
-        for (Bullet b : activePattern.getActiveBullets()) {
-            if (!hitBullets.contains(b) && soul.hitbox.overlaps(b.hitbox)) {
-                hitBullets.add(b);
-                controller.applyBulletHit();
-                hpBar.setHp(controller.getPlayerHp());
-                if (!controller.isPlayerAlive()) {
-                    exitBulletHell();
-                    game.goToGameOver();
-                    return;
+
+        if (!soul.isInvincible()) {
+            for (Bullet b : activePattern.getActiveBullets()) {
+                if (!hitBullets.contains(b) && soul.hitbox.overlaps(b.hitbox)) {
+                    hitBullets.add(b);
+                    soul.onHit();
+                    controller.applyBulletHit();
+                    hpBar.setHp(controller.getPlayerHp());
+                    if (!controller.isPlayerAlive()) {
+                        exitBulletHell();
+                        game.goToGameOver();
+                        return;
+                    }
+                    break; // i-frames started; remaining bullets pass through this frame
                 }
             }
         }
+
         if (activePattern.isFinished()) exitBulletHell();
     }
 
@@ -273,6 +311,15 @@ public class CombatScreen extends BaseScreen {
         soul.render(game.shapes);
         for (Bullet b : activePattern.getActiveBullets()) b.render(game.shapes);
         game.shapes.end();
+        activePattern.renderSprites(game.batch);
+    }
+
+    /** Elige el renderer correcto: Kenny si sus sprites existen, genérico si no. */
+    private static BossRenderer buildBossRenderer(String spriteId) {
+        KennyBossAssets kenny = new KennyBossAssets(0.15f);
+        if (kenny.isLoaded()) return kenny;
+        kenny.dispose();
+        return new BossAssets(spriteId, 64, 64, 0.12f);
     }
 
     private void drawEnemyGrid() {
@@ -280,17 +327,18 @@ public class CombatScreen extends BaseScreen {
         float zoneW = SCREEN_W - 80f;
         float zoneY = ENEMY_ZONE_Y;
         float zoneH = SCREEN_H - ENEMY_ZONE_Y - 4f;
-        float cellW = zoneW / GRID_COLS;
-        float cellH = zoneH / GRID_ROWS;
+        float cellW = zoneW / 6f;
+        float cellH = zoneH / 2f;
 
         game.shapes.begin(ShapeRenderer.ShapeType.Filled);
         game.shapes.setColor(Color.GREEN);
-        for (int col = 0; col <= GRID_COLS; col++) {
+        for (int col = 0; col <= 6; col++) {
             game.shapes.rect(zoneX + col * cellW, zoneY, 2f, zoneH);
         }
-        for (int row = 0; row <= GRID_ROWS; row++) {
+        for (int row = 0; row <= 2; row++) {
             game.shapes.rect(zoneX, zoneY + row * cellH, zoneW, 2f);
         }
         game.shapes.end();
     }
+
 }

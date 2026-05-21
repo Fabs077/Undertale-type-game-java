@@ -1,58 +1,42 @@
 package com.rpg.engine.combat.states;
 
+import com.rpg.engine.combat.ActionResult;
 import com.rpg.engine.combat.CombatManager;
 import com.rpg.engine.core.interfaces.CombatAction;
 import com.rpg.engine.core.interfaces.CombatState;
 
 /**
- * Estado del turno del boss: ejecuta su patrón bullet-hell y aplica daño al player.
+ * Estado del turno del boss: marca que el bullet-hell está en curso.
  *
  * Ciclo de vida:
- *   onEnter → pide el patrón al boss y lo guarda. NO aplica daño (el daño se resuelve
- *             en update para que executeAction() retorne antes del ataque del boss).
- *   update  → aplica el daño del boss al player y transiciona a PlayerMenuState.
- *             (En FXGL este método avanzaría frame a frame la animación del patrón.)
- *   handleAction → no-op: el jugador no elige acciones durante el ataque del boss.
+ *   onEnter → pide el id del patrón al boss y lo guarda. El daño lo aplica la UI
+ *             (CombatController.applyBulletHit()) bala a bala durante la secuencia real.
+ *   update  → llamado por notifyBulletHellComplete() cuando la UI termina el patrón;
+ *             transiciona de vuelta a PlayerMenuState.
+ *   handleAction → no-op: el jugador no elige acciones mientras el boss ataca.
  *   onExit  → no-op.
- *
- * Daño aplicado = max(0, boss.computeAttackPower() − player.getTotalDefense()).
- * Si el daño mitigado es 0 el player esquivó completamente (por alta defensa).
- * Si el player muere, el bucle externo detecta isCombatOver() y termina la partida.
  */
 public class EnemyBulletHellState implements CombatState {
 
-    private boolean attackResolved; // true una vez que update() aplicó el daño
-    private String  activePattern;  // id del patrón en curso; FXGL lo lee para la animación
+    private String activePattern;  // id del patrón en curso; la UI lo lee para instanciar el patrón correcto
 
     @Override
     public void onEnter(CombatManager ctx) {
-        attackResolved = false;
-        activePattern  = ctx.getCurrentBoss().executeBulletHellPattern();
-        // FXGL: iniciar animación del patrón aquí — el daño se aplica en update()
-        // para que executeAction() retorne antes de que el boss ataque.
+        activePattern = ctx.getCurrentBoss().executeBulletHellPattern();
     }
 
     @Override
     public void update(CombatManager ctx) {
-        if (attackResolved) return; // guarda contra llamadas dobles
-
-        int raw      = ctx.getCurrentBoss().computeAttackPower();
-        int mitigated = Math.max(0, raw - ctx.getPlayer().getTotalDefense());
-        if (mitigated > 0) {
-            ctx.getPlayer().takeDamage(mitigated);
+        // Llamado por CombatController.notifyBulletHellComplete() una vez que la UI termina.
+        // Si el player murió durante el bullet-hell no transicionamos: isCombatOver() lo detecta.
+        if (ctx.getPlayer().isAlive()) {
+            ctx.changeState(new PlayerMenuState());
         }
-        attackResolved = true;
-
-        // Si el player murió no transicionamos: el bucle externo detecta isCombatOver()
-        if (!ctx.getPlayer().isAlive()) return;
-
-        ctx.changeState(new PlayerMenuState());
     }
 
     @Override
-    public void handleAction(CombatAction action, CombatManager ctx) {
-        // El jugador no elige acciones durante el ataque del boss.
-        // Una futura DodgeAction podría aceptarse aquí para reducir el daño.
+    public ActionResult handleAction(CombatAction action, CombatManager ctx) {
+        return ActionResult.noEffect(""); // no player actions during boss attack
     }
 
     @Override
@@ -61,6 +45,6 @@ public class EnemyBulletHellState implements CombatState {
     @Override
     public String getName() { return "EnemyBulletHell"; }
 
-    /** @return id del patrón bullet-hell activo; FXGL lo usa para elegir la animación */
+    /** @return id del patrón bullet-hell activo; la UI lo usa para instanciar el patrón correcto */
     public String getActivePattern() { return activePattern; }
 }

@@ -52,13 +52,13 @@ public class PlayerQteState implements CombatState {
      * Si es FightAction aplica el multiplicador de QTE perfecto y ejecuta el ataque.
      */
     @Override
-    public void handleAction(CombatAction action, CombatManager ctx) {
-        if (qteResolved) return;
-        if (!(action instanceof FightAction)) return;
+    public ActionResult handleAction(CombatAction action, CombatManager ctx) {
+        if (qteResolved || !(action instanceof FightAction)) return ActionResult.noEffect("");
 
         qteResolved = true;
         ctx.setQteMultiplier(PERFECT_MULTIPLIER);
         resolveAttack(ctx);
+        return ActionResult.noEffect("QTE resuelto.");
     }
 
     private void resolveAttack(CombatManager ctx) {

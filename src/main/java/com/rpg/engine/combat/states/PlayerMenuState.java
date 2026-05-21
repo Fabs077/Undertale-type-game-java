@@ -30,18 +30,16 @@ public class PlayerMenuState implements CombatState {
     }
 
     @Override
-    public void handleAction(CombatAction action, CombatManager ctx) {
-        if (ctx.isCombatOver()) return;
+    public ActionResult handleAction(CombatAction action, CombatManager ctx) {
+        if (ctx.isCombatOver()) return ActionResult.noEffect("El combate ya terminó.");
 
         ActionResult result = action.execute(ctx);
 
-        if (result.isCombatEnded()) {
-            return;
-        }
-
-        if (result.isTurnEnded()) {
+        if (!result.isCombatEnded() && result.isTurnEnded()) {
             ctx.changeState(new EnemyBulletHellState());
         }
+
+        return result;
     }
 
     @Override
