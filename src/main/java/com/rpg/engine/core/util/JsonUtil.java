@@ -19,7 +19,7 @@ import com.google.gson.JsonSyntaxException;
 public final class JsonUtil {
 
     private static final Gson GSON = new GsonBuilder()
-            .serializeNulls()   // incluye campos null en el JSON (importante para IDs de equipo opcionales)
+            .serializeNulls()   // incluye campos null en el JSON 
             .setPrettyPrinting()
             .create();
 

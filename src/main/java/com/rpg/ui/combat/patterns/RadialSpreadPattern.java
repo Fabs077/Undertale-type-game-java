@@ -11,7 +11,7 @@ public class RadialSpreadPattern implements BulletPattern {
 
     private static final int   BULLET_COUNT    = 12;
     private static final float BULLET_SPEED    = 130f;
-    private static final float DURATION        = 5f;
+    private static final float DURATION        = 8f;
     private static final float SPAWN_INTERVAL  = 0.3f;  // seconds between each bullet spawn
 
     private record SpawnData(float x, float y, float vx, float vy) {}

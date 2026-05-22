@@ -3,8 +3,14 @@ package com.rpg.ui.widgets;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.rpg.engine.items.Armor;
+import com.rpg.engine.items.Consumable;
+import com.rpg.engine.items.Item;
+import com.rpg.engine.items.Weapon;
 import com.rpg.ui.theme.Fonts;
 import com.rpg.ui.theme.Palette;
+
+import java.util.ArrayList;
 
 /**
  * Inventory submenu panel: 2-column grid of items with stat labels.
@@ -18,36 +24,41 @@ public class ItemListWidget {
     private static final float ROW_H    = 34f;
     private static final float FOOTER_H = 28f;
 
-    // Dummy data: {name, statLabel}
-    private static final String[][] ITEMS = {
-        {"Pocion",       "20 HP" },
-        {"Manzana",      "+3 ATK"},
-        {"Daga",         "+2 ATK"},
-        {"Escudo Viejo", "+1 DEF"},
-    };
+    private ArrayList<Item>    items       = new ArrayList<>();
+    private GlyphLayout[] statLayouts = new GlyphLayout[0];
+    private int           selectedIndex = 0;
 
-    private final GlyphLayout[] statLayouts = new GlyphLayout[ITEMS.length];
-    private int selectedIndex = 0;
-
-    public ItemListWidget() {
-        for (int i = 0; i < ITEMS.length; i++) {
-            statLayouts[i] = new GlyphLayout(Fonts.monoTiny, ITEMS[i][1]);
+    /** Replaces the displayed list with the player's current inventory. */
+    public void setItems(ArrayList<Item> newItems) {
+        items = new ArrayList<>(newItems);
+        statLayouts = new GlyphLayout[items.size()];
+        for (int i = 0; i < items.size(); i++) {
+            statLayouts[i] = new GlyphLayout(Fonts.monoTiny, statLabel(items.get(i)));
         }
+        selectedIndex = 0;
+    }
+
+    private static String statLabel(Item item) {
+        if (item instanceof Consumable c) return "+" + c.getHealAmount() + " HP";
+        if (item instanceof Weapon w)    return "+" + w.getStatBonus()   + " ATK";
+        if (item instanceof Armor a)     return "+" + a.getStatBonus()   + " DEF";
+        return "";
     }
 
     /** dx/dy: -1, 0, or +1. Wraps within the 2-col grid. */
     public void navigate(int dx, int dy) {
+        if (items.isEmpty()) return;
         int col    = selectedIndex % COLS;
         int row    = selectedIndex / COLS;
-        int maxRow = (ITEMS.length - 1) / COLS;
+        int maxRow = (items.size() - 1) / COLS;
         col = Math.floorMod(col + dx, COLS);
         row = Math.floorMod(row + dy, maxRow + 1);
         int next = row * COLS + col;
-        selectedIndex = Math.min(next, ITEMS.length - 1);
+        selectedIndex = Math.min(next, items.size() - 1);
     }
 
     public int    getSelectedIndex() { return selectedIndex; }
-    public String getSelectedName()  { return ITEMS[selectedIndex][0]; }
+    public String getSelectedName()  { return items.isEmpty() ? "" : items.get(selectedIndex).getName(); }
     public void   reset()            { selectedIndex = 0; }
 
     public void render(SpriteBatch batch, ShapeRenderer shapes,
@@ -71,26 +82,30 @@ public class ItemListWidget {
         shapes.end();
 
         float colW        = (innerW - 2 * PAD) / COLS;
-        float contentTopY = y + h - BORDER - PAD; // first row baseline (y-up)
+        float contentTopY = y + h - BORDER - PAD;
 
         batch.begin();
 
-        // Items grid
-        for (int i = 0; i < ITEMS.length; i++) {
-            int   col  = i % COLS;
-            int   row  = i / COLS;
-            float itemX = innerX + PAD + col * colW;
-            float itemY = contentTopY - row * ROW_H;
-            boolean sel = (i == selectedIndex);
+        if (items.isEmpty()) {
+            Fonts.sansSmall.setColor(Palette.SECONDARY);
+            Fonts.sansSmall.draw(batch, "Inventario vacío", innerX + PAD, contentTopY);
+        } else {
+            for (int i = 0; i < items.size(); i++) {
+                int   col   = i % COLS;
+                int   row   = i / COLS;
+                float itemX = innerX + PAD + col * colW;
+                float itemY = contentTopY - row * ROW_H;
+                boolean sel = (i == selectedIndex);
 
-            // Name with cursor
-            Fonts.sansSmall.setColor(sel ? Palette.PRIMARY : Palette.ON_SURFACE);
-            Fonts.sansSmall.draw(batch, (sel ? "> " : "  ") + ITEMS[i][0], itemX, itemY);
+                // Name with cursor
+                Fonts.sansSmall.setColor(sel ? Palette.PRIMARY : Palette.ON_SURFACE);
+                Fonts.sansSmall.draw(batch, (sel ? "> " : "  ") + items.get(i).getName(), itemX, itemY);
 
-            // Stat label, right-aligned within its column
-            Fonts.monoTiny.setColor(sel ? Palette.PRIMARY : Palette.SECONDARY);
-            float statX = itemX + colW - statLayouts[i].width - PAD;
-            Fonts.monoTiny.draw(batch, ITEMS[i][1], statX, itemY);
+                // Stat label, right-aligned within its column
+                Fonts.monoTiny.setColor(sel ? Palette.PRIMARY : Palette.SECONDARY);
+                float statX = itemX + colW - statLayouts[i].width - PAD;
+                Fonts.monoTiny.draw(batch, statLabel(items.get(i)), statX, itemY);
+            }
         }
 
         // Footer hint

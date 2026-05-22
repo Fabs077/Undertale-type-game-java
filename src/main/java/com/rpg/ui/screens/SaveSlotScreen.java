@@ -12,25 +12,32 @@ import com.rpg.ui.bridge.SaveBundle;
 import com.rpg.ui.bridge.SaveSlotManager;
 import com.rpg.ui.theme.Fonts;
 import com.rpg.ui.theme.Palette;
+import com.rpg.ui.widgets.PixelButton;
 import com.rpg.ui.widgets.SaveSlotCard;
 
 public class SaveSlotScreen extends BaseScreen {
 
     public enum Mode { LOAD, SAVE }
 
-    private static final int   SLOT_COUNT  = 3;
-    private static final float CARD_X      = (1280 - SaveSlotCard.WIDTH) / 2f;
-    private static final float CARD_GAP    = 24f;
-    private static final float STACK_H     = SLOT_COUNT * SaveSlotCard.HEIGHT + (SLOT_COUNT - 1) * CARD_GAP;
-    private static final float CARD_BASE_Y = (720 - STACK_H) / 2f;
-    private static final float TITLE_Y     = 660f;
+    private static final int   SLOT_COUNT   = 3;
+    private static final int   ITEM_COUNT   = SLOT_COUNT + 1; // slots + botón volver
+    private static final float CARD_X       = (1280 - SaveSlotCard.WIDTH) / 2f;
+    private static final float CARD_GAP     = 24f;
+    private static final float STACK_H      = SLOT_COUNT * SaveSlotCard.HEIGHT + (SLOT_COUNT - 1) * CARD_GAP;
+    private static final float CARD_BASE_Y  = (720 - STACK_H) / 2f;
+    private static final float TITLE_Y      = 660f;
+    private static final float BACK_BTN_W   = 240f;
+    private static final float BACK_BTN_H   = 56f;
+    private static final float BACK_BTN_X   = (1280 - BACK_BTN_W) / 2f;
+    private static final float BACK_BTN_Y   = CARD_BASE_Y - CARD_GAP - BACK_BTN_H;
 
-    private final Mode           mode;
+    private final Mode            mode;
     private final CombatController controller; // null en modo LOAD
-    private final SaveSlotCard[] cards;
+    private final SaveSlotCard[]  cards;
+    private final PixelButton     backButton;
     private final SaveSlotManager manager;
-    private final GlyphLayout    titleLayout;
-    private final float          titleX;
+    private final GlyphLayout     titleLayout;
+    private final float           titleX;
     private int selectedIndex = 0;
 
     /** Modo LOAD: desde el menú principal. */
@@ -60,28 +67,35 @@ public class SaveSlotScreen extends BaseScreen {
             cards[i].setInfo(manager.getSlotInfo(i));
         }
         cards[selectedIndex].setSelected(true);
+
+        backButton = new PixelButton(BACK_BTN_X, BACK_BTN_Y, BACK_BTN_W, BACK_BTN_H, "VOLVER");
     }
 
+    private boolean isBackSelected() { return selectedIndex == SLOT_COUNT; }
+
     private void navigate(int dir) {
-        cards[selectedIndex].setSelected(false);
-        selectedIndex = (selectedIndex + dir + SLOT_COUNT) % SLOT_COUNT;
-        cards[selectedIndex].setSelected(true);
+        if (isBackSelected()) backButton.setSelected(false);
+        else                  cards[selectedIndex].setSelected(false);
+
+        selectedIndex = (selectedIndex + dir + ITEM_COUNT) % ITEM_COUNT;
+
+        if (isBackSelected()) backButton.setSelected(true);
+        else                  cards[selectedIndex].setSelected(true);
     }
 
     private void confirm() {
-        if (mode == Mode.SAVE) {
-            executeSave();
-        } else {
-            executeLoad();
-        }
+        if (isBackSelected()) { game.goToMainMenu(); return; }
+        if (mode == Mode.SAVE) executeSave();
+        else                   executeLoad();
     }
 
     private void executeSave() {
         try {
+            // phase + 1: el boss de la fase actual fue derrotado; al cargar arranca la siguiente
             manager.saveToSlot(selectedIndex,
                     controller.getPlayer(),
                     controller.getHistoryManager(),
-                    controller.getPhase());
+                    controller.getPhase() + 1);
             game.goToMainMenu();
         } catch (SaveCorruptionException e) {
             cards[selectedIndex].setCorrupted(true);
@@ -89,6 +103,7 @@ public class SaveSlotScreen extends BaseScreen {
     }
 
     private void executeLoad() {
+        if (cards[selectedIndex].isEmpty())     return;
         if (cards[selectedIndex].isCorrupted()) return;
 
         try {
@@ -122,5 +137,6 @@ public class SaveSlotScreen extends BaseScreen {
         game.batch.end();
 
         for (SaveSlotCard card : cards) card.render(game.shapes, game.batch);
+        backButton.render(game.shapes, game.batch);
     }
 }

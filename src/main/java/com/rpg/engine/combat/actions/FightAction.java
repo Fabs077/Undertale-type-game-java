@@ -24,6 +24,14 @@ public class FightAction implements CombatAction {
         Player player = ctx.getPlayer();
         Boss   boss   = ctx.getCurrentBoss();
 
+        // Evasion: boss may dodge before damage is calculated (e.g. KennyBoss's 15-dodge counter).
+        // turnEnded=true so the boss still counter-attacks after evading.
+        if (boss.tryEvade()) {
+            ctx.resetQteMultiplier();
+            return ActionResult.miss(
+                String.format("¡%s esquiva el ataque! ¡¡MISS!!", boss.getName()));
+        }
+
         double multiplier = ctx.getQteMultiplier();
         int    damage     = Math.max(1, (int) Math.round(player.getTotalAttack() * multiplier));
         ctx.resetQteMultiplier();

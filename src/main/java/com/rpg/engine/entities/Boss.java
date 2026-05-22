@@ -104,6 +104,17 @@ public class Boss extends Enemy {
     }
 
     // -------------------------------------------------------------------------
+    // Evasion hook
+    // -------------------------------------------------------------------------
+
+    /**
+     * Called by FightAction before applying damage.
+     * Default: never evades. KennyBoss overrides with a finite dodge counter.
+     * @return true if the attack was dodged (no damage applied)
+     */
+    public boolean tryEvade() { return false; }
+
+    // -------------------------------------------------------------------------
     // Bullet Hell (mock — Capa 4+ implementa la lógica real)
     // -------------------------------------------------------------------------
 

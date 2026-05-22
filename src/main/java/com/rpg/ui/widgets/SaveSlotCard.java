@@ -94,8 +94,19 @@ public class SaveSlotCard {
         if (info != null && info.corrupted()) this.corrupted = true;
     }
 
-    public void setSelected(boolean selected)   { this.selected  = selected; }
-    public void setCorrupted(boolean corrupted) { this.corrupted = corrupted; }
-    public boolean isSelected()                 { return selected; }
-    public boolean isCorrupted()                { return corrupted || (info != null && info.corrupted()); }
+    public void setSelected(boolean selected)   { 
+    	this.selected  = selected; 
+    	}
+    public void setCorrupted(boolean corrupted) { 
+    	this.corrupted = corrupted; 
+    	}
+    public boolean isSelected()                 { 
+    	return selected; 
+    	}
+    public boolean isEmpty()                    { 
+    	return info != null && info.empty(); 
+    	}
+    public boolean isCorrupted()                { 
+    	return corrupted || (info != null && info.corrupted());
+    	}
 }

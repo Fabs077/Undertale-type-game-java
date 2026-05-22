@@ -1,6 +1,8 @@
 package com.rpg.ui.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.rpg.engine.combat.ActionResult;
 import com.rpg.ui.RpgGame;
@@ -8,12 +10,18 @@ import com.rpg.ui.bridge.CombatController;
 import com.rpg.ui.combat.Bullet;
 import com.rpg.ui.combat.BossAssets;
 import com.rpg.ui.combat.BossRenderer;
+import com.rpg.ui.combat.EclipseAssets;
 import com.rpg.ui.combat.KennyBossAssets;
 import com.rpg.ui.combat.BulletPattern;
 import com.rpg.ui.combat.CombatBox;
 import com.rpg.ui.combat.Soul;
-import com.rpg.ui.combat.patterns.KennyMousePattern;
-import com.rpg.ui.combat.patterns.RadialSpreadPattern;
+import com.rpg.ui.combat.patterns.CardboxFieldPattern;
+import com.rpg.ui.combat.patterns.CoinDropPattern;
+import com.rpg.ui.combat.patterns.CoinPattern;
+import com.rpg.ui.combat.patterns.CompositeBulletPattern;
+import com.rpg.ui.combat.patterns.KnightRatPattern;
+import com.rpg.ui.combat.patterns.OrbitalRingPattern;
+import com.rpg.ui.combat.patterns.VanTrafficPattern;
 import com.rpg.ui.input.PlayerInputAdapter;
 import com.rpg.ui.widgets.ActionMenu;
 import com.rpg.ui.widgets.ActListWidget;
@@ -59,6 +67,14 @@ public class CombatScreen extends BaseScreen {
     // Acción a ejecutar cuando el diálogo activo termina (Z presionado al final)
     private Runnable postDialogueAction = () -> state = State.MENU;
 
+    private static final String[] KENNY_ACT_REFUSALS = {
+        "Kenny: ¡Hablar es para los débiles!\n¡Esquiva esto!",
+        "Kenny: ¿Negociar? ¡Ni lo sueñes!",
+        "Kenny: ¡Ya no hay tiempo para charlas!",
+        "Kenny: ¡No me interesa lo que tengas que decir!"
+    };
+    private int kennyRefusalIdx = 0;
+
     // Balas que ya golpearon al alma en este bullet hell (evita multi-hit)
     private final HashSet<Bullet> hitBullets = new HashSet<>();
 
@@ -82,6 +98,7 @@ public class CombatScreen extends BaseScreen {
         actionMenu = new ActionMenu(ACTION_Y);
         actList.setBossName(controller.getBossName());
         bossSprite = buildBossRenderer(controller.getBossSpriteId());
+        showDialogue(controller.getBossIntroDialogue(), () -> state = State.MENU);
     }
 
     @Override
@@ -94,6 +111,7 @@ public class CombatScreen extends BaseScreen {
 
     @Override
     protected void draw(float delta) {
+        combatBox.update(delta);
         handleInput();
         if (state == State.DIALOGUE)    dialogueBox.update(delta);
         if (state == State.BULLET_HELL) updateBulletHell(delta);
@@ -221,18 +239,24 @@ public class CombatScreen extends BaseScreen {
         switch (actionMenu.getSelectedIndex()) {
             case 0 -> {
                 ActionResult result = controller.executeFight();
-                bossSprite.playOnce("hurt");
+                if (result.getDamageDealt() > 0) bossSprite.playOnce("hurt");
                 if (result.isCombatEnded()) showDialogue(result.getMessage(), () -> game.goToPostBoss(controller));
                 else showDialogue(result.getMessage(), this::enterBulletHell);
             }
             case 1 -> {
-                combatBox.setMode(CombatBox.Mode.NARROW);
-                actList.reset();
-                state = State.SUBMENU_ACT;
+                if (controller.isKennyBoss()) {
+                    controller.executeAct("hablar"); // advance engine to EnemyBulletHellState
+                    String refusal = KENNY_ACT_REFUSALS[kennyRefusalIdx++ % KENNY_ACT_REFUSALS.length];
+                    showDialogue(refusal, this::enterBulletHell);
+                } else {
+                    combatBox.setMode(CombatBox.Mode.NARROW);
+                    actList.reset();
+                    state = State.SUBMENU_ACT;
+                }
             }
             case 2 -> {
                 combatBox.setMode(CombatBox.Mode.NARROW);
-                itemList.reset();
+                itemList.setItems(controller.getInventory());
                 state = State.SUBMENU_ITEM;
             }
             case 3 -> {
@@ -257,27 +281,62 @@ public class CombatScreen extends BaseScreen {
 
     private void enterBulletHell() {
         if (activePattern != null) activePattern.dispose();
+        String patternId = controller.getActivePatternId();
         combatBox.setMode(CombatBox.Mode.WIDE);
+        if (isGravityPattern(patternId)) combatBox.setPhase2Shape();
+        combatBox.snapToTarget();   // soul + pattern must see final dimensions, not lerp start
         hitBullets.clear();
         soul = new Soul(
             combatBox.getInnerX() + combatBox.getInnerWidth()  / 2f,
             combatBox.getInnerY() + combatBox.getInnerHeight() / 2f
         );
-        activePattern = createPattern(controller.getActivePatternId(), soul);
+        if (isGravityPattern(patternId)) soul.setMode(Soul.SoulMode.BLUE);
+        activePattern = createPattern(patternId, soul);
         activePattern.start(combatBox);
         bossSprite.playOnce("attack");
         state = State.BULLET_HELL;
     }
 
+    private static boolean isGravityPattern(String id) {
+        return id != null && (id.equals("kenny_van") || id.startsWith("kenny_g"));
+    }
+
     private void exitBulletHell() {
         combatBox.setMode(CombatBox.Mode.NARROW);
         controller.notifyBulletHellComplete();
-        state = State.MENU;
+        if (controller.consumeKennyPhase2Trigger()) {
+            showDialogue(
+                "Kenny: ¡Ya basta de juegos!\n¡Ahora las REGLAS CAMBIAN!",
+                () -> state = State.MENU);
+        } else {
+            state = State.MENU;
+        }
     }
 
     /** Maps a boss pattern id to the corresponding BulletPattern implementation. */
     private BulletPattern createPattern(String id, Soul soul) {
-        return new KennyMousePattern(soul);
+        return switch (id) {
+            case "orbital_ring"  -> new OrbitalRingPattern();
+            case "kenny_cardbox" -> new CardboxFieldPattern(soul);
+            case "kenny_van"     -> new VanTrafficPattern();
+            // No-gravity mixed patterns
+            case "kenny_ng2"     -> new CompositeBulletPattern(
+                                        new KnightRatPattern(soul),
+                                        new CoinPattern());
+            case "kenny_ng3"     -> new CompositeBulletPattern(
+                                        new KnightRatPattern(soul),
+                                        new CoinPattern(),
+                                        new CardboxFieldPattern(soul));
+            // Gravity mixed patterns (Blue Soul / platformer)
+            case "kenny_g2"      -> new CompositeBulletPattern(
+                                        new VanTrafficPattern(),
+                                        new CoinDropPattern());
+            case "kenny_g3"      -> new CompositeBulletPattern(
+                                        new VanTrafficPattern(),
+                                        new CoinDropPattern(),
+                                        new CardboxFieldPattern(soul));
+            default              -> new KnightRatPattern(soul);  // "kenny_rat" + fallback
+        };
     }
 
     // ── helpers ────────────────────────────────────────────────────────────
@@ -285,6 +344,10 @@ public class CombatScreen extends BaseScreen {
     private void updateBulletHell(float delta) {
         activePattern.update(delta);
         soul.update(delta, combatBox);
+
+        // Una vez que una bala deja de solaparse con el alma se permite que golpee de nuevo.
+        // Esto es correcto para balas que orbitan y vuelven a pasar por la misma posición.
+        hitBullets.removeIf(b -> !soul.hitbox.overlaps(b.hitbox));
 
         if (!soul.isInvincible()) {
             for (Bullet b : activePattern.getActiveBullets()) {
@@ -307,18 +370,25 @@ public class CombatScreen extends BaseScreen {
     }
 
     private void renderBulletHell() {
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         game.shapes.begin(ShapeRenderer.ShapeType.Filled);
         soul.render(game.shapes);
         for (Bullet b : activePattern.getActiveBullets()) b.render(game.shapes);
+        activePattern.renderShapes(game.shapes);
         game.shapes.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
         activePattern.renderSprites(game.batch);
     }
 
-    /** Elige el renderer correcto: Kenny si sus sprites existen, genérico si no. */
+    /** Elige el renderer correcto según el spriteId del boss activo. */
     private static BossRenderer buildBossRenderer(String spriteId) {
-        KennyBossAssets kenny = new KennyBossAssets(0.15f);
-        if (kenny.isLoaded()) return kenny;
-        kenny.dispose();
+        if ("BossEclipse".equals(spriteId)) return new EclipseAssets(0.18f);
+        if ("BossKenny".equals(spriteId)) {
+            KennyBossAssets kenny = new KennyBossAssets(0.15f);
+            if (kenny.isLoaded()) return kenny;
+            kenny.dispose();
+        }
         return new BossAssets(spriteId, 64, 64, 0.12f);
     }
 

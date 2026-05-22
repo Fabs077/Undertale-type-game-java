@@ -31,8 +31,8 @@ public class PostBossScreen extends BaseScreen {
             // Navega a la pantalla de slots en modo SAVE con el estado actual
             game.setScreen(new SaveSlotScreen(game, controller));
         } else {
-            // Continúa al siguiente combate (fase progression se conecta con PhaseManager)
-            game.goToCombat();
+            // Avanza a la siguiente fase manteniendo el estado del jugador (HP, inventario, historia)
+            game.setScreen(new CombatScreen(game, controller.nextPhase()));
         }
     }
 }
