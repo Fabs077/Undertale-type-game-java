@@ -57,9 +57,8 @@ public class ItemListWidget {
         selectedIndex = Math.min(next, items.size() - 1);
     }
 
-    public int    getSelectedIndex() { return selectedIndex; }
-    public String getSelectedName()  { return items.isEmpty() ? "" : items.get(selectedIndex).getName(); }
-    public void   reset()            { selectedIndex = 0; }
+    public int  getSelectedIndex() { return selectedIndex; }
+    public void reset()            { selectedIndex = 0; }
 
     public void render(SpriteBatch batch, ShapeRenderer shapes,
                        float x, float y, float w, float h) {
